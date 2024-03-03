@@ -8,12 +8,12 @@ import {
 } from "@material-tailwind/react";
 
 interface ProjectCardProps {
-  img: string;
+  images: [string];
   title: string;
-  desc: string;
+  description: string;
 }
 
-export function ProjectCard({ img, title, desc }: ProjectCardProps) {
+export function ProjectCard({ images, title, description }: ProjectCardProps) {
   return (
     <Card color="transparent" shadow={false} placeholder={undefined}>
       <CardHeader
@@ -22,7 +22,7 @@ export function ProjectCard({ img, title, desc }: ProjectCardProps) {
         placeholder={undefined}
       >
         <Image
-          src={img}
+          src={images[0]}
           alt={title}
           width={768}
           height={768}
@@ -42,7 +42,7 @@ export function ProjectCard({ img, title, desc }: ProjectCardProps) {
           className="mb-6 font-normal !text-gray-500"
           placeholder={undefined}
         >
-          {desc}
+          {description}
         </Typography>
         <Button color="gray" size="sm" placeholder={undefined}>
           see details

@@ -16,11 +16,13 @@ import { useEffect, useState } from "react";
 import {
   getUserDataAPI,
   getProjectDetailsAPI,
+  getImage,
 } from "../firebase/firebase.utils";
 import { DocumentData } from "firebase/firestore";
 
 export default function Portfolio() {
   const [userInfo, setUserInfo] = useState<DocumentData | undefined>();
+  const [projectInfo, setProjectInfo] = useState<DocumentData | undefined>();
 
   const getUserData = async () => {
     const data = await getUserDataAPI();
@@ -32,7 +34,20 @@ export default function Portfolio() {
   const getProjectDetails = async () => {
     const data = await getProjectDetailsAPI();
     if (data) {
-      console.log("-->", data);
+      const updatedProjectInfo = await Promise.all(
+        data?.projects.map(async (project: any) => {
+          const images = await Promise.all(
+            project.images.map(async (image: string) => {
+              return await getImage(image);
+            })
+          );
+          return {
+            ...project,
+            images,
+          };
+        })
+      );
+      setProjectInfo(updatedProjectInfo);
     }
   };
   useEffect(() => {
@@ -46,7 +61,7 @@ export default function Portfolio() {
       <Hero userInfo={userInfo} />
       <Clients />
       <Skills />
-      <Projects />
+      <Projects projectInfo={projectInfo} />
       <Resume />
       <Testimonial />
       <PopularClients />
