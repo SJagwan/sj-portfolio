@@ -63,7 +63,7 @@ export default function Portfolio() {
       <Skills />
       <Projects projectInfo={projectInfo} />
       <Resume />
-      <Testimonial />
+      <Testimonial projectInfo={projectInfo} />
       <PopularClients />
       <ContactForm />
       <Footer />

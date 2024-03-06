@@ -4,7 +4,6 @@ import { ProjectCard } from "@/components";
 import { Typography } from "@material-tailwind/react";
 
 export function Projects({ projectInfo }: { projectInfo: any }) {
-
   return (
     <section className="py-28 px-8">
       <div className="container mx-auto mb-20 text-center">
