@@ -6,9 +6,17 @@ interface ProjectCardProps {
   images: [string];
   title: string;
   description: string;
+  prodLink: string;
+  affiliation: string;
 }
 
-export function ProjectCard2({ images, title, description }: ProjectCardProps) {
+export function ProjectCard2({
+  images,
+  title,
+  description,
+  prodLink,
+  affiliation,
+}: ProjectCardProps) {
   const [active, setActive] = React.useState(+images.length);
 
   //Auto image changing code.
@@ -49,15 +57,13 @@ export function ProjectCard2({ images, title, description }: ProjectCardProps) {
             className="mb-4 font-bold lg:max-w-xs"
             placeholder={undefined}
           >
-            Mobile App Development
+            {title}
           </Typography>
           <Typography
             className="mb-3 w-full lg:w-8/12 font-normal !text-gray-500"
             placeholder={undefined}
           >
-            I had the pleasure of working with Lily on a critical web
-            development project, and I can confidently say that their expertise
-            and professionalism exceeded my expectations.
+            {description}
           </Typography>
           <Typography
             variant="h6"
@@ -65,15 +71,18 @@ export function ProjectCard2({ images, title, description }: ProjectCardProps) {
             className="mb-0.5"
             placeholder={undefined}
           >
-            Michael - Technical Manager
+            {affiliation}
           </Typography>
-          <Typography
-            variant="small"
-            className="font-normal mb-5 !text-gray-500"
-            placeholder={undefined}
-          >
-            Marketing @ APPLE INC.
-          </Typography>
+          <a href={prodLink} target="_blank">
+            <Typography
+              variant="small"
+              className="font-normal mb-5 !text-gray-500"
+              placeholder={undefined}
+            >
+              See details
+            </Typography>
+          </a>
+
           <div className="flex items-center gap-4">
             {images.map((image, index) => (
               <div key={index} className="flex items-center gap-4">
@@ -83,7 +92,7 @@ export function ProjectCard2({ images, title, description }: ProjectCardProps) {
                   alt="spotify"
                   size="sm"
                   className={`cursor-pointer ${
-                    active === index + 1 ? "opacity-100" : "opacity-50"
+                    active === index ? "opacity-100" : "opacity-50"
                   }`}
                   placeholder={undefined}
                   onClick={() => setActive(index)}

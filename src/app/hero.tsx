@@ -19,7 +19,7 @@ function Hero({ userInfo }: { userInfo: any }) {
   }, [userInfo?.profileImg]);
 
   return (
-    <header className="bg-white p-8">
+    <header className="bg-white p-8" id="home">
       <div className="container mx-auto grid h-full gap-10 min-h-[60vh] w-full grid-cols-1 items-center lg:grid-cols-2">
         <div className="row-start-2 lg:row-auto">
           <Typography

@@ -17,11 +17,12 @@ const NAV_MENU = [
   {
     name: "Projects",
     icon: RectangleStackIcon,
+    href: "#projects",
   },
   {
     name: "Contact",
     icon: UserCircleIcon,
-    href: "https://www.material-tailwind.com/docs/react/installation",
+    href: "#contact",
   },
 ];
 
@@ -36,7 +37,7 @@ function NavItem({ children, href }: NavItemProps) {
       <Typography
         as="a"
         href={href || "#"}
-        target={href ? "_blank" : "_self"}
+        target={href && "_self"}
         variant="paragraph"
         color="gray"
         className="flex items-center gap-2 font-medium text-gray-900"
@@ -68,13 +69,16 @@ export function Navbar() {
       placeholder={undefined}
     >
       <div className="container mx-auto flex items-center justify-between">
-        <Typography
-          color="blue-gray"
-          className="text-lg font-bold"
-          placeholder={undefined}
-        >
-          Material Tailwind
-        </Typography>
+        <a href="#home">
+          <Typography
+            color="blue-gray"
+            className="text-lg font-bold"
+            placeholder={undefined}
+          >
+            Material Tailwind
+          </Typography>
+        </a>
+
         <ul className="ml-10 hidden items-center gap-8 lg:flex">
           {NAV_MENU.map(({ name, icon: Icon, href }) => (
             <NavItem key={name} href={href}>

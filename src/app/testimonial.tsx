@@ -1,3 +1,4 @@
+"use client";
 
 import React from "react";
 import { Typography } from "@material-tailwind/react";
@@ -5,7 +6,7 @@ import ProjectCard2 from "@/components/project-card-2";
 
 export function Testimonial({ projectInfo }: { projectInfo: any }) {
   return (
-    <section className="py-12 px-8 lg:py-24">
+    <section className="py-12 px-8 lg:py-24" id="projects">
       <div className="container max-w-screen-lg mx-auto">
         <div className="container mx-auto mb-20 text-center">
           <Typography
@@ -14,15 +15,15 @@ export function Testimonial({ projectInfo }: { projectInfo: any }) {
             className="mb-4"
             placeholder={undefined}
           >
-            What Clients Say
+            My Work
           </Typography>
           <Typography
             variant="lead"
             className="mx-auto w-full px-4 font-normal !text-gray-500 lg:w-8/12"
             placeholder={undefined}
           >
-            Discover what clients have to say about their experiences working
-            with me. My client&apos;s satisfaction is my greatest achievement!
+            Explore the projects I've worked on, showcasing my skills and
+            expertise.
           </Typography>
         </div>
       </div>

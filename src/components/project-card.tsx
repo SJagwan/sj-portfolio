@@ -11,9 +11,15 @@ interface ProjectCardProps {
   images: [string];
   title: string;
   description: string;
+  prodLink: string;
 }
 
-export function ProjectCard({ images, title, description }: ProjectCardProps) {
+export function ProjectCard({
+  images,
+  title,
+  description,
+  prodLink,
+}: ProjectCardProps) {
   return (
     <Card color="transparent" shadow={false} placeholder={undefined}>
       <CardHeader
@@ -44,9 +50,11 @@ export function ProjectCard({ images, title, description }: ProjectCardProps) {
         >
           {description}
         </Typography>
-        <Button color="gray" size="sm" placeholder={undefined}>
-          see details
-        </Button>
+        <a href={prodLink} target="_blank">
+          <Button color="gray" size="sm" placeholder={undefined}>
+            see details
+          </Button>
+        </a>
       </CardBody>
     </Card>
   );
