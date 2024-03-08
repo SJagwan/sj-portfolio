@@ -52,3 +52,18 @@ export const getImage = async (url) => {
   const urlValue = await getDownloadURL(storageRef);
   return urlValue;
 };
+
+export const downloadResume = async () => {
+  const storageRef = ref(storage, "documents/Shubhanshu Jagwan Resume.pdf");
+  const url = await getDownloadURL(storageRef);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.download = "Shubhanshu_Jagwan_Resume.pdf";
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(() => {
+    link.remove();
+  }, 100);
+};

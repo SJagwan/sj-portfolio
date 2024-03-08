@@ -43,10 +43,18 @@ function Hero({ userInfo }: { userInfo: any }) {
             className="font-normal !text-gray-500"
             placeholder={undefined}
           >
-            <a href="#" className="font-medium underline transition-colors">
+            <a
+              href={userInfo?.githubUrl}
+              target="_blank"
+              className="font-medium underline transition-colors"
+            >
               GitHub
             </a>
-            <a href="#" className="font-medium underline transition-colors">
+            <a
+              href={userInfo?.linkedInUrl}
+              target="_blank"
+              className="font-medium underline transition-colors"
+            >
               LinkedIn
             </a>
           </Typography>

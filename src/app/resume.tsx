@@ -8,19 +8,20 @@ import {
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
 import { ResumeItem } from "@/components";
+import { downloadResume } from "@/firebase/firebase.utils";
 
 const RESUME_ITEMS = [
   {
     icon: ChartBarIcon,
-    children: "Bachelor of Science in Computer Science",
+    children: "React",
   },
   {
     icon: PuzzlePieceIcon,
-    children: "Certified Web Developer ",
+    children: "Node.js",
   },
   {
     icon: CursorArrowRaysIcon,
-    children: "Frontend Framework Proficiency Certification",
+    children: "AWS Cloud",
   },
 ];
 
@@ -36,20 +37,22 @@ export function Resume() {
             className="mb-4 mt-3 w-9/12 font-normal !text-gray-500"
             placeholder={undefined}
           >
-            Highly skilled and creative Web Developer with 5+ years of
-            experience in crafting visually stunning and functionally robust
-            websites and web applications.
+            Full-Stack Developer with a passion for building user-friendly and
+            scalable web applications. Leveraging 2.5+ years of experience, I've
+            spearheaded the development of innovative solutions using AWS cloud
+            technologies.
           </Typography>
           <Button
             variant="text"
             color="gray"
             className="flex items-center gap-2"
-            placeholder={undefined}
+            placeholder={"resume"}
+            onClick={() => downloadResume()}
           >
             Download
             <ArrowDownTrayIcon
-              strokeWidth={3}
-              className="h-3.5 w-3.5 text-gray-900"
+              strokeWidth={4}
+              className="h-5 w-5 text-gray-900"
             />
           </Button>
         </div>
