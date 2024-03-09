@@ -4,7 +4,7 @@ import React from "react";
 import { Typography } from "@material-tailwind/react";
 import ProjectCard2 from "@/components/project-card-2";
 
-export function Testimonial({ projectInfo }: { projectInfo: any }) {
+export function Projects2({ projectInfo }: { projectInfo: any }) {
   return (
     <section className="py-12 px-8 lg:py-24" id="projects">
       <div className="container max-w-screen-lg mx-auto">
@@ -36,4 +36,4 @@ export function Testimonial({ projectInfo }: { projectInfo: any }) {
   );
 }
 
-export default Testimonial;
+export default Projects2;

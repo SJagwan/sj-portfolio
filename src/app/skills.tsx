@@ -3,50 +3,29 @@
 import { Typography } from "@material-tailwind/react";
 import {
   RectangleGroupIcon,
-  FingerPrintIcon,
   SwatchIcon,
   HashtagIcon,
-  EyeIcon,
-  DocumentTextIcon,
 } from "@heroicons/react/24/solid";
 import { SkillCard } from "@/components";
 
 const SKILLS = [
   {
     icon: RectangleGroupIcon,
-    title: "Frontend Web Development:",
+    title: "Full-Stack Web Development:",
     children:
-      "Creating beautiful and functional web experiences is my forte. Using the latest technologies and best practices, I design and build websites that captivate and engage users.",
-  },
-  {
-    icon: FingerPrintIcon,
-    title: "Mobile App Development",
-    children:
-      " I specialize in creating responsive and intuitive mobile apps that work seamlessly across iOS & Android devices. From concept to deployment, I handle every stage of the development process.",
+      "I craft user-friendly and scalable web applications, seamlessly integrating frontend and backend development to deliver a smooth and intuitive user experience.",
   },
   {
     icon: SwatchIcon,
-    title: "Technology Stack",
+    title: "Technology Stack:",
     children:
-      "I'm well-versed in the industry's most popular frontend technologies, including HTML5, CSS3, JavaScript, and frameworks like React and React Native.",
+      "I'm proficient in ReactJS, NodeJS, and familiar with AWS cloud services. This allows me to create robust and efficient web applications.",
   },
   {
     icon: HashtagIcon,
-    title: " Web Optimization",
+    title: "Web Performance Optimization:",
     children:
-      "Performance matters. I optimize websites and apps for speed, ensuring your users enjoy a fast and responsive experience, which in turn boosts user satisfaction and SEO rankings.",
-  },
-  {
-    icon: EyeIcon,
-    title: "User-Centric Design",
-    children:
-      "My development goes hand-in-hand with an eye for design. I create user interfaces that are not only functional but also aesthetically pleasing, providing a seamless and enjoyable user journey.",
-  },
-  {
-    icon: DocumentTextIcon,
-    title: "Testing and Quality Assurance",
-    children:
-      "I rigorously test and debug applications to guarantee a bug-free and secure environment for users. Your peace of mind is as important to me as the functionality of your project.",
+      "Speed matters. I optimize web applications for fast loading times and smooth responsiveness, delivering a positive user experience that keeps users engaged.",
   },
 ];
 
@@ -54,20 +33,23 @@ export function Skills() {
   return (
     <section className="px-8">
       <div className="container mx-auto mb-20 text-center">
-        <Typography color="blue-gray" className="mb-2 font-bold uppercase" placeholder={undefined}>
+        <Typography
+          variant="h2"
+          color="blue-gray"
+          className="mb-2 font-bold uppercase"
+          placeholder={undefined}
+        >
           my skills
-        </Typography>
-        <Typography variant="h1" color="blue-gray" className="mb-4" placeholder={undefined}>
-          What I do
         </Typography>
         <Typography
           variant="lead"
           className="mx-auto w-full !text-gray-500 lg:w-10/12"
           placeholder={undefined}
         >
-          I&apos;m not just a developer; I&apos;m a digital dreamweaver.
-          Crafting immersive online experiences is not just a job but my
-          calling. Discover below how I can help you.
+          I thrive on tackling complex web development challenges and
+          transforming them into elegant and efficient solutions. My strong
+          problem-solving skills and attention to detail allow me to deliver
+          high-quality applications that exceed your expectations.
         </Typography>
       </div>
       <div className="container mx-auto grid grid-cols-1 gap-y-10 md:grid-cols-2 lg:grid-cols-3">

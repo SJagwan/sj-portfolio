@@ -8,7 +8,7 @@ import Hero from "./hero";
 import Skills from "./skills";
 import Projects from "./projects";
 import Resume from "./resume";
-import Testimonial from "./testimonial";
+import Projects2 from "./projects2";
 import PopularClients from "./popular-clients";
 import ContactForm from "./contact-form";
 import { useEffect, useState } from "react";
@@ -59,7 +59,7 @@ export default function Portfolio() {
       <Navbar />
       <Hero userInfo={userInfo} />
       <Resume />
-      <Testimonial projectInfo={projectInfo} />
+      <Projects2 projectInfo={projectInfo} />
       <Skills />
       <Projects projectInfo={projectInfo} />
       <PopularClients />
