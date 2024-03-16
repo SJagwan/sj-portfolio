@@ -108,11 +108,11 @@ export function ProjectCard2({
             ))}
           </div>
         </div>
-        <div className="h-[21rem] rounded-lg w-full sm:w-[18rem] shrink-0">
+        <div className="h-[18rem] rounded-lg w-full sm:w-[32rem] shrink-0">
           <Image
             width={768}
             height={768}
-            alt="testimonial image"
+            alt="projects image"
             src={images[active]}
             className="h-full rounded-lg w-full object-cover"
             onMouseEnter={handleHoverStart}

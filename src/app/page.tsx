@@ -61,9 +61,9 @@ export default function Portfolio() {
       <Resume />
       <Projects2 projectInfo={projectInfo} />
       <Skills />
-      <Projects projectInfo={projectInfo} />
+      {/* <Projects projectInfo={projectInfo} /> */}
       <PopularClients />
-      <ContactForm />
+      <ContactForm userInfo={userInfo}/>
       <Footer />
     </>
   );
