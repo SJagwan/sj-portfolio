@@ -22,7 +22,7 @@ export function Projects2({ projectInfo }: { projectInfo: any }) {
             className="mx-auto w-full px-4 font-normal !text-gray-500 lg:w-8/12"
             placeholder={undefined}
           >
-            Explore the projects I've worked on, showcasing my skills and
+            Explore the projects I&apos;ve worked on, showcasing my skills and
             expertise.
           </Typography>
         </div>

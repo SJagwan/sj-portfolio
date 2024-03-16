@@ -63,9 +63,9 @@ function Hero({ userInfo }: { userInfo: any }) {
           <Image
             width={1024}
             height={1024}
-            alt="team work"
+            alt="profile"
             src={heroImg}
-            className="h-[32rem] w-full rounded-xl object-cover"
+            className="h-[32rem] w-full rounded-xl object-contain"
           />
         )}
       </div>

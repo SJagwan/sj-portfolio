@@ -38,7 +38,7 @@ export function Resume() {
             placeholder={undefined}
           >
             Full-Stack Developer with a passion for building user-friendly and
-            scalable web applications. Leveraging 2.5+ years of experience, I've
+            scalable web applications. Leveraging 2.5+ years of experience, I&apos;ve
             spearheaded the development of innovative solutions using AWS cloud
             technologies.
           </Typography>
