@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Typography } from "@material-tailwind/react";
-import { getImage } from "@/firebase/firebase.utils";
+import { getImage } from "../firebase/firebase.utils";
 import { useEffect, useState } from "react";
 
 function Hero({ userInfo }: { userInfo: any }) {

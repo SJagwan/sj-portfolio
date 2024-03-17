@@ -1,5 +1,3 @@
-"use client";
-
 import { Typography, Button } from "@material-tailwind/react";
 import {
   ChartBarIcon,
@@ -38,9 +36,9 @@ export function Resume() {
             placeholder={undefined}
           >
             Full-Stack Developer with a passion for building user-friendly and
-            scalable web applications. Leveraging 2.5+ years of experience, I&apos;ve
-            spearheaded the development of innovative solutions using AWS cloud
-            technologies.
+            scalable web applications. Leveraging 2.5+ years of experience,
+            I&apos;ve spearheaded the development of innovative solutions using
+            AWS cloud technologies.
           </Typography>
           <Button
             variant="text"
@@ -57,7 +55,7 @@ export function Resume() {
           </Button>
         </div>
         <div className="col-span-1 grid gap-y-6 lg:ml-auto pr-0 lg:pr-12 xl:pr-32">
-          {RESUME_ITEMS.map((props, idx) => (
+          {RESUME_ITEMS?.map((props, idx) => (
             <ResumeItem key={idx} {...props} />
           ))}
         </div>

@@ -1,3 +1,4 @@
+"use client";
 import { Card, Typography } from "@material-tailwind/react";
 
 interface ResumeItemProps {

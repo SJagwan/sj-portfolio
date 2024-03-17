@@ -2,7 +2,6 @@ import React from "react";
 import {
   Navbar as MTNavbar,
   Collapse,
-  Button,
   IconButton,
   Typography,
 } from "@material-tailwind/react";
@@ -80,7 +79,7 @@ export function Navbar() {
         </a>
 
         <ul className="ml-10 hidden items-center gap-8 lg:flex">
-          {NAV_MENU.map(({ name, icon: Icon, href }) => (
+          {NAV_MENU?.map(({ name, icon: Icon, href }) => (
             <NavItem key={name} href={href}>
               <Icon className="h-5 w-5" />
               {name}

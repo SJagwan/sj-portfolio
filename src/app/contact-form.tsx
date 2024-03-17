@@ -4,17 +4,13 @@ import {
   Typography,
   Card,
   CardBody,
-  Radio,
   Input,
-  Textarea,
   Button,
   IconButton,
 } from "@material-tailwind/react";
-import { EnvelopeIcon, PhoneIcon, TicketIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/solid";
 
 export function ContactForm({ userInfo }: { userInfo: any }) {
-  const [email, setEmail] = useState("");
   const handleClick = () => {
     const subject = "Inquiry from your website";
     const recipientEmail = userInfo?.email;
@@ -146,7 +142,6 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
                   containerProps={{
                     className: "!min-w-full mb-8",
                   }}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
 
                 <div className="w-full flex justify-end">
