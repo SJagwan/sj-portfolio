@@ -2,22 +2,8 @@
 
 import Image from "next/image";
 import { Typography } from "@material-tailwind/react";
-import { getImage } from "../firebase/firebase.utils";
-import { useEffect, useState } from "react";
 
 function Hero({ userInfo }: { userInfo: any }) {
-  const [heroImg, setHeroImg] = useState<string | null>(null);
-
-  const getImageData = async (url: string) => {
-    if (url) {
-      const imageUrl: any = await getImage(url);
-      setHeroImg(imageUrl);
-    }
-  };
-  useEffect(() => {
-    getImageData(userInfo?.profileImg);
-  }, [userInfo?.profileImg]);
-
   return (
     <header className="bg-white p-8" id="home">
       <div className="container mx-auto grid h-full gap-10 min-h-[60vh] w-full grid-cols-1 items-center lg:grid-cols-2">
@@ -59,12 +45,12 @@ function Hero({ userInfo }: { userInfo: any }) {
             </a>
           </Typography>
         </div>
-        {heroImg && (
+        {userInfo?.profileImg && (
           <Image
             width={1024}
             height={1024}
             alt="profile"
-            src={heroImg}
+            src={userInfo?.profileImg}
             className="h-[32rem] w-full rounded-xl object-contain"
           />
         )}

@@ -28,7 +28,12 @@ export default function Portfolio() {
     try {
       const data = await getUserDataAPI();
       if (data) {
-        setUserInfo(data);
+        if (data?.profileImg) {
+          const imgData = await getImage(data.profileImg);
+          setUserInfo({ ...data, profileImg: imgData });
+        } else {
+          setUserInfo(data);
+        }
       }
     } catch (err: any) {
       setError(err); // Handle errors gracefully
@@ -70,22 +75,28 @@ export default function Portfolio() {
 
   return (
     <>
-      {/* {isLoading ? (
-        <div>Loading data...</div>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-screen">
+          <div className="loading">
+            <div className="h-3 w-3 bg-blue-500 rounded-full animate-ping"></div>
+            <div className="h-3 w-3 bg-red-500 rounded-full animate-pulse delay-100"></div>
+            <div className="h-3 w-3 bg-yellow-500 rounded-full animate-bounce delay-200"></div>
+          </div>
+        </div>
       ) : error ? (
         <div>Error: {error.message}</div>
       ) : (
-        <> */}
-      <Navbar />
-      <Hero userInfo={userInfo} />
-      <Resume />
-      <Projects projectInfo={projectInfo} />
-      <Skills />
-      <PopularClients />
-      <ContactForm userInfo={userInfo} />
-      <Footer />
-      {/* </>
-      )} */}
+        <>
+          <Navbar />
+          <Hero userInfo={userInfo} />
+          <Resume />
+          <Projects projectInfo={projectInfo} />
+          <Skills />
+          <PopularClients />
+          <ContactForm userInfo={userInfo} />
+          <Footer />
+        </>
+      )}
     </>
   );
 }

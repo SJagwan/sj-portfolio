@@ -1,4 +1,3 @@
-"use client";
 import { Card, Typography } from "@material-tailwind/react";
 
 interface ResumeItemProps {
@@ -16,7 +15,10 @@ export function ResumeItem({ icon: Icon, children }: ResumeItemProps) {
       >
         <Icon className="h-6 w-6" strokeWidth={2} />
       </Card>
-      <Typography className="w-full font-normal !text-gray-500" placeholder={undefined}>
+      <Typography
+        className="w-full font-normal !text-gray-500"
+        placeholder={undefined}
+      >
         {children}
       </Typography>
     </div>
