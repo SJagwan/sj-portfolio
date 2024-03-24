@@ -5,7 +5,7 @@ const CLIENTS = ["softobotics", "capgemini"];
 
 export function PopularClients() {
   return (
-    <section className="py-8 px-8 lg:py-20">
+    <section className="py-8 px-8 lg:py-20 ">
       <div className="container mx-auto grid items-center place-items-center">
         <div className="text-center">
           <Typography

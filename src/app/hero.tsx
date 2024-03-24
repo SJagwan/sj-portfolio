@@ -24,26 +24,7 @@ function Hero({ userInfo }: { userInfo: any }) {
             {userInfo?.description || " "}
           </Typography>
 
-          <Typography
-            variant="small"
-            className="font-normal !text-gray-500"
-            placeholder={undefined}
-          >
-            <a
-              href={userInfo?.githubUrl}
-              target="_blank"
-              className="font-medium underline transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href={userInfo?.linkedInUrl}
-              target="_blank"
-              className="font-medium underline transition-colors"
-            >
-              LinkedIn
-            </a>
-          </Typography>
+          
         </div>
         {userInfo?.profileImg && (
           <Image
@@ -51,7 +32,7 @@ function Hero({ userInfo }: { userInfo: any }) {
             height={1024}
             alt="profile"
             src={userInfo?.profileImg}
-            className="h-[32rem] w-full rounded-xl object-contain"
+            className=" md:h-[30rem] sm:h-max sm:w-max md:w-full rounded-xl object-contain"
           />
         )}
       </div>

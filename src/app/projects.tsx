@@ -5,7 +5,7 @@ import { ProjectCard } from "@/components";
 export function Projects({ projectInfo }: { projectInfo: any }) {
   return (
     <section className="py-12 px-8 lg:py-24" id="projects">
-      <div className="container max-w-screen-lg mx-auto">
+      <div className="container max-w-screen-lg mx-auto border-t border-gray-200 pt-10">
         <div className="container mx-auto mb-20 text-center">
           <Typography
             variant="h2"
@@ -25,7 +25,7 @@ export function Projects({ projectInfo }: { projectInfo: any }) {
           </Typography>
         </div>
       </div>
-      <div className="container mx-auto grid grid-cols-1 gap-x-10 gap-y-20 md:grid-cols-1 xl:grid-cols-1">
+      <div className="container mx-auto grid grid-cols-1 gap-x-10 gap-y-20 md:grid-cols-1 xl:grid-cols-1 ">
         {projectInfo?.map((props: any, idx: any) => (
           <ProjectCard key={idx} {...props} />
         ))}

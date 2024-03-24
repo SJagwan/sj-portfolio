@@ -43,7 +43,7 @@ export function ProjectCard({
     <Card
       color="transparent"
       shadow={false}
-      className="py-8 lg:flex-row"
+      className="py-8  lg:flex-row"
       placeholder={undefined}
     >
       <CardBody
@@ -68,15 +68,15 @@ export function ProjectCard({
           <Typography
             variant="h6"
             color="blue-gray"
-            className="mb-0.5"
+            className="ml-1 mb-2 bg-blue-500 text-white py-1 px-2 rounded-full w-max"
             placeholder={undefined}
           >
             {affiliation}
           </Typography>
           <a href={prodLink} target="_blank">
             <Typography
-              variant="small"
-              className="font-normal mb-5 !text-gray-500"
+              variant="paragraph"
+              className="ml-3 text-gray-500 hover:text-blue-500 font-normal mb-5 underline"
               placeholder={undefined}
             >
               See details
@@ -106,14 +106,14 @@ export function ProjectCard({
             ))}
           </div>
         </div>
-        <div className="h-[18rem] rounded-lg w-full sm:w-[32rem] shrink-0">
+        <div className="rounded-lg w-full sm:w-[32rem] shrink-0">
           {images[active] && (
             <Image
               width={768}
               height={768}
               alt="projects image"
               src={images[active]}
-              className="h-full rounded-lg w-full object-cover"
+              className="h-max rounded-lg w-max object-cover"
               onMouseEnter={handleHoverStart}
               onMouseLeave={handleHoverEnd}
             />

@@ -10,6 +10,10 @@ import { downloadResume } from "@/firebase/firebase.utils";
 
 const RESUME_ITEMS = [
   {
+    icon: CursorArrowRaysIcon,
+    children: "AWS Cloud",
+  },
+  {
     icon: ChartBarIcon,
     children: "React",
   },
@@ -17,15 +21,11 @@ const RESUME_ITEMS = [
     icon: PuzzlePieceIcon,
     children: "Node.js",
   },
-  {
-    icon: CursorArrowRaysIcon,
-    children: "AWS Cloud",
-  },
 ];
 
 export function Resume() {
   return (
-    <section className="px-8 py-24">
+    <section className="px-8 py-24 ">
       <div className="container mx-auto grid w-full grid-cols-1 items-center gap-16 lg:grid-cols-2">
         <div className="col-span-1">
           <Typography variant="h2" color="blue-gray" placeholder={undefined}>
@@ -41,7 +41,7 @@ export function Resume() {
             AWS cloud technologies.
           </Typography>
           <Button
-            variant="text"
+            variant="outlined"
             color="gray"
             className="flex items-center gap-2"
             placeholder={"resume"}
@@ -54,7 +54,7 @@ export function Resume() {
             />
           </Button>
         </div>
-        <div className="col-span-1 grid gap-y-6 lg:ml-auto pr-0 lg:pr-12 xl:pr-32">
+        <div className="flex flex-wrap gap-10 md:justify-center">
           {RESUME_ITEMS?.map((props, idx) => (
             <ResumeItem key={idx} {...props} />
           ))}

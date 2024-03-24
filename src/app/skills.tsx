@@ -29,7 +29,7 @@ const SKILLS = [
 
 export function Skills() {
   return (
-    <section className="px-8">
+    <section className="px-8 py-8">
       <div className="container mx-auto mb-20 text-center">
         <Typography
           variant="h2"
@@ -50,7 +50,7 @@ export function Skills() {
           high-quality applications that exceed your expectations.
         </Typography>
       </div>
-      <div className="container mx-auto grid grid-cols-1 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
+      <div className="container mx-auto grid grid-cols-1 gap-y-5 md:grid-cols-2 lg:grid-cols-3">
         {SKILLS.map((props, idx) => (
           <SkillCard key={idx} {...props} />
         ))}
