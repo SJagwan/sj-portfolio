@@ -43,7 +43,7 @@ export function ProjectCard({
     <Card
       color="transparent"
       shadow={false}
-      className="py-8  lg:flex-row"
+      className="py-8 lg:flex-row"
       placeholder={undefined}
     >
       <CardBody
@@ -54,29 +54,32 @@ export function ProjectCard({
           <Typography
             variant="h3"
             color="blue-gray"
-            className="mb-4 font-bold lg:max-w-xs"
+            className="flex gap-3 mb-4 font-bold lg:max-w-sm"
             placeholder={undefined}
           >
-            {title}
+            {title}{" "}
+            <span>
+              <Typography
+                variant="paragraph"
+                color="blue-gray"
+                className=" bg-blue-500 text-white px-4 py-1 rounded-full w-max"
+                placeholder={undefined}
+              >
+                {affiliation}
+              </Typography>
+            </span>
           </Typography>
+
           <Typography
             className="mb-3 w-full lg:w-8/12 font-normal !text-gray-500"
             placeholder={undefined}
           >
             {description}
           </Typography>
-          <Typography
-            variant="h6"
-            color="blue-gray"
-            className="ml-1 mb-2 bg-blue-500 text-white py-1 px-2 rounded-full w-max"
-            placeholder={undefined}
-          >
-            {affiliation}
-          </Typography>
           <a href={prodLink} target="_blank">
             <Typography
               variant="paragraph"
-              className="ml-3 text-gray-500 hover:text-blue-500 font-normal mb-5 underline"
+              className="text-gray-500 hover:text-blue-500 font-normal mb-5 underline"
               placeholder={undefined}
             >
               See details

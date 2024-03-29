@@ -7,7 +7,7 @@ interface ResumeItemProps {
 
 export function ResumeItem({ icon: Icon, children }: ResumeItemProps) {
   return (
-    <div className="flex items-start gap-4">
+    <div className="flex items-center gap-4">
       <Card
         color="gray"
         className="h-12 w-12 shrink-0 items-center justify-center !rounded-lg"

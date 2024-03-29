@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Typography,
-  Card,
-  CardBody,
-  Input,
-  Button,
-  IconButton,
-} from "@material-tailwind/react";
+import { Typography, Card, CardBody, Button } from "@material-tailwind/react";
 import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/solid";
 
 export function ContactForm({ userInfo }: { userInfo: any }) {
@@ -64,13 +57,13 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
               client and send us a message.
             </Typography>
             <div className="flex gap-5">
-              <PhoneIcon className="h-6 w-6 text-white" />
+              <PhoneIcon className="h-5 w-5 text-white" />
               <Typography variant="h6" color="white" placeholder={undefined}>
                 +91 {userInfo?.phoneNumber}
               </Typography>
             </div>
             <div className="flex my-2  gap-5">
-              <EnvelopeIcon className="h-6 w-6 text-white" />
+              <EnvelopeIcon className="h-5 w-5 text-white" />
               <Typography variant="h6" color="white" placeholder={undefined}>
                 {userInfo?.email}
               </Typography>
@@ -79,14 +72,14 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
               <a
                 href={userInfo?.githubUrl}
                 target="_blank"
-                className="font-medium transition-colors w-max text-white hover:text-blue-500"
+                className="font-medium transition-colors w-max text-white hover:text-blue-500 underline"
               >
                 GitHub
               </a>
               <a
                 href={userInfo?.linkedInUrl}
                 target="_blank"
-                className="font-medium transition-colors text-white hover:text-blue-500"
+                className="font-medium transition-colors text-white hover:text-blue-500 underline"
               >
                 LinkedIn
               </a>
