@@ -56,13 +56,13 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
               Ready to get started? Click the button below to open your email
               client and send us a message.
             </Typography>
-            <div className="flex gap-5">
+            <div className="flex gap-2 md:gap-5">
               <PhoneIcon className="h-5 w-5 text-white" />
               <Typography variant="h6" color="white" placeholder={undefined}>
                 +91 {userInfo?.phoneNumber}
               </Typography>
             </div>
-            <div className="flex my-2  gap-5">
+            <div className="flex my-2 gap-2 md:gap-5">
               <EnvelopeIcon className="h-5 w-5 text-white" />
               <Typography variant="h6" color="white" placeholder={undefined}>
                 {userInfo?.email}

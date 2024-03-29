@@ -32,7 +32,7 @@ export function Resume() {
             My Resume
           </Typography>
           <Typography
-            className="mb-4 mt-3 w-9/12 font-normal !text-gray-500"
+            className="mb-4 mt-3 font-normal !text-gray-500"
             placeholder={undefined}
           >
             Full-Stack Developer with a passion for building user-friendly and

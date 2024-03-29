@@ -54,13 +54,13 @@ export function ProjectCard({
           <Typography
             variant="h3"
             color="blue-gray"
-            className="flex gap-3 mb-4 font-bold lg:max-w-sm"
+            className="flex gap-5 mb-4 font-bold lg:max-w-sm items-center"
             placeholder={undefined}
           >
             {title}{" "}
             <span>
               <Typography
-                variant="paragraph"
+                variant="small"
                 color="blue-gray"
                 className=" bg-blue-500 text-white px-4 py-1 rounded-full w-max"
                 placeholder={undefined}
