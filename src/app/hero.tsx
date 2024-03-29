@@ -23,18 +23,19 @@ function Hero({ userInfo }: { userInfo: any }) {
           >
             {userInfo?.description || " "}
           </Typography>
-
-          
         </div>
-        {userInfo?.profileImg && (
-          <Image
-            width={1024}
-            height={1024}
-            alt="profile"
-            src={userInfo?.profileImg}
-            className=" md:h-[30rem] sm:h-max sm:w-max md:w-full rounded-xl object-contain"
-          />
-        )}
+
+        <div className="mx-auto">
+          {userInfo?.profileImg && (
+            <Image
+              width={1024}
+              height={1024}
+              alt="profile"
+              src={userInfo?.profileImg}
+              className=" md:h-[30rem] h-max w-max md:w-[22.5rem] rounded-xl object-contain"
+            />
+          )}
+        </div>
       </div>
     </header>
   );

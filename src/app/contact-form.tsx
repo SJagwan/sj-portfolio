@@ -13,7 +13,7 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
     <section className="px-8 py-8" id="contact">
       <Card
         shadow={false}
-        className="container mx-auto"
+        className="container mx-auto border-t border-gray-200 pt-12"
         placeholder={undefined}
       >
         <CardBody

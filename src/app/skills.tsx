@@ -29,8 +29,8 @@ const SKILLS = [
 
 export function Skills() {
   return (
-    <section className="px-8 py-8">
-      <div className="container mx-auto mb-20 text-center">
+    <section className="px-8 py-8 ">
+      <div className="container mx-auto mb-20 text-center border-t border-gray-200 pt-12">
         <Typography
           variant="h2"
           color="blue-gray"

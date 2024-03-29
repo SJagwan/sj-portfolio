@@ -5,8 +5,8 @@ const CLIENTS = ["softobotics", "capgemini"];
 
 export function PopularClients() {
   return (
-    <section className="py-8 px-8 lg:py-20 ">
-      <div className="container mx-auto grid items-center place-items-center">
+    <section className="px-8">
+      <div className="container mx-auto grid items-center place-items-center border-t border-gray-200 pt-12">
         <div className="text-center">
           <Typography
             variant="h5"
