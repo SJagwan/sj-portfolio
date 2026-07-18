@@ -1,6 +1,8 @@
 import React from "react";
 import { Typography } from "@material-tailwind/react";
-import { ProjectCard, ScrollReveal } from "@/components";
+import { ScrollReveal } from "@/components";
+import { ProjectCard } from "@/components/portfolio";
+
 
 export function Projects({ projectInfo, isLoading }: { projectInfo: any; isLoading?: boolean }) {
   return (

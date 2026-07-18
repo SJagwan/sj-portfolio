@@ -5,9 +5,10 @@ import {
   CursorArrowRaysIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
-import { ResumeItem } from "@/components";
+import { ResumeItem } from "@/components/portfolio";
 import { downloadResume } from "@/firebase/firebase.utils";
-import { ScrollReveal } from "@/components/scroll-reveal";
+import { ScrollReveal } from "@/components";
+
 
 const RESUME_ITEMS = [
   {

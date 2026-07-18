@@ -4,7 +4,9 @@ import {
   SwatchIcon,
   HashtagIcon,
 } from "@heroicons/react/24/solid";
-import { SkillCard, ScrollReveal } from "@/components";
+import { ScrollReveal } from "@/components";
+import { SkillCard } from "@/components/portfolio";
+
 
 const SKILLS = [
   {

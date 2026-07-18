@@ -2,7 +2,8 @@
 
 import { Typography, Button } from "@material-tailwind/react";
 import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/solid";
-import { ScrollReveal } from "@/components/scroll-reveal";
+import { ScrollReveal } from "@/components";
+
 
 export function ContactForm({ userInfo }: { userInfo: any }) {
   const handleClick = () => {
