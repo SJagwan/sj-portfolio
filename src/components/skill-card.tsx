@@ -1,4 +1,4 @@
-import { Card, CardBody, Typography } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 
 interface SkillCardProps {
   title: string;
@@ -8,30 +8,25 @@ interface SkillCardProps {
 
 export function SkillCard({ icon: Icon, title, children }: SkillCardProps) {
   return (
-    <Card color="transparent" shadow={false} placeholder={undefined}>
-      <CardBody
-        className="grid justify-center text-center"
+    <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-100/50 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center">
+      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100/30 text-indigo-600">
+        <Icon className="h-6 w-6" strokeWidth={2} />
+      </div>
+      <Typography
+        variant="h5"
+        className="mb-3 text-slate-900 font-bold text-lg font-heading"
         placeholder={undefined}
       >
-        <div className="mx-auto mb-6 grid h-12 w-12 place-items-center rounded-full bg-gray-900 p-2.5 text-white shadow">
-          <Icon className="h-6 w-6" strokeWidth={2} />
-        </div>
-        <Typography
-          variant="h5"
-          color="blue-gray"
-          className="mb-2"
-          placeholder={undefined}
-        >
-          {title}
-        </Typography>
-        <Typography
-          className="px-8 font-normal !text-gray-500"
-          placeholder={undefined}
-        >
-          {children}
-        </Typography>
-      </CardBody>
-    </Card>
+        {title}
+      </Typography>
+      <Typography
+        className="text-slate-500 font-normal leading-relaxed text-base font-sans"
+        placeholder={undefined}
+      >
+
+        {children}
+      </Typography>
+    </div>
   );
 }
 

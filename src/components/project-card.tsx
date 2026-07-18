@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
-import { Card, CardBody, Typography, Avatar } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 
 interface ProjectCardProps {
-  images: [string];
+  images: string[];
   title: string;
   description: string;
   prodLink: string;
@@ -17,113 +17,117 @@ export function ProjectCard({
   prodLink,
   affiliation,
 }: ProjectCardProps) {
-  const [active, setActive] = React.useState(+images?.length);
+  const [active, setActive] = React.useState(0);
 
-  //Auto image changing code.
+  // Auto image changing code
   const intervalRef = useRef<any>(null);
   useEffect(() => {
+    if (!images || images.length <= 1) return;
+
     intervalRef.current = setInterval(() => {
-      setActive((prevActive) => (prevActive + 1) % +images?.length);
-    }, 2000);
+      setActive((prevActive) => (prevActive + 1) % images.length);
+    }, 3000);
 
     return () => clearInterval(intervalRef.current);
-  }, [images?.length]);
+  }, [images]);
 
   const handleHoverStart = () => {
     clearInterval(intervalRef.current);
   };
 
   const handleHoverEnd = () => {
+    if (!images || images.length <= 1) return;
     intervalRef.current = setInterval(() => {
-      setActive((prevActive) => (prevActive + 1) % +images?.length);
-    }, 2000);
+      setActive((prevActive) => (prevActive + 1) % images.length);
+    }, 3000);
   };
 
   return (
-    <Card
-      color="transparent"
-      shadow={false}
-      className="py-8 lg:flex-row"
-      placeholder={undefined}
-    >
-      <CardBody
-        className="w-full lg:gap-10 h-full lg:!flex justify-between "
-        placeholder={undefined}
-      >
-        <div className="w-full mb-10 lg:mb-0">
-          <Typography
-            variant="h3"
-            color="blue-gray"
-            className="flex gap-5 mb-4 font-bold lg:max-w-sm items-center"
-            placeholder={undefined}
-          >
-            {title}{" "}
-            <span>
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className=" bg-blue-500 text-white px-4 py-1 rounded-full w-max"
-                placeholder={undefined}
-              >
+    <div className="bg-white rounded-[2rem] border border-slate-100 p-6 md:p-8 hover:shadow-lg hover:border-indigo-100/50 transition-all duration-300">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div className="lg:col-span-7 flex flex-col justify-between h-full order-2 lg:order-1">
+          <div>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/50 font-sans">
                 {affiliation}
-              </Typography>
-            </span>
-          </Typography>
-
-          <Typography
-            className="mb-3 w-full lg:w-8/12 font-normal !text-gray-500"
-            placeholder={undefined}
-          >
-            {description}
-          </Typography>
-          <a href={prodLink} target="_blank">
+              </span>
+            </div>
+            
             <Typography
-              variant="paragraph"
-              className="text-gray-500 hover:text-blue-500 font-normal mb-5 underline"
+              variant="h3"
+              className="text-2xl md:text-3xl font-extrabold text-slate-900 font-heading mb-4"
               placeholder={undefined}
             >
-              See details
+              {title}
             </Typography>
-          </a>
 
-          <div className="flex items-center gap-4">
-            {images?.map((image, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <Avatar
-                  variant="rounded"
-                  src={image}
-                  alt="spotify"
-                  size="sm"
-                  className={`cursor-pointer ${
-                    active === index ? "opacity-100" : "opacity-50"
-                  }`}
-                  placeholder={undefined}
-                  onClick={() => setActive(index)}
-                  onMouseEnter={handleHoverStart}
-                  onMouseLeave={handleHoverEnd}
-                />
-                {index + 1 !== images?.length && (
-                  <div className="w-[1px] h-[36px] bg-blue-gray-100" />
-                )}
+            <Typography
+              className="text-slate-500 font-normal leading-relaxed text-base font-sans mb-6"
+              placeholder={undefined}
+            >
+              {description}
+            </Typography>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-4 border-t border-slate-100/80">
+            <a
+              href={prodLink}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-bold text-sm transition-all duration-200 group"
+            >
+              See Project Details
+              <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform">
+                &rarr;
+              </span>
+            </a>
+
+            {/* Custom Dot Indicators */}
+            {images?.length > 1 && (
+              <div className="flex gap-2">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActive(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      active === index ? "w-6 bg-slate-900" : "w-2 bg-slate-200 hover:bg-slate-400"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
-        <div className="rounded-lg w-full sm:w-[32rem] shrink-0">
-          {images[active] && (
-            <Image
-              width={768}
-              height={768}
-              alt="projects image"
-              src={images[active]}
-              className="h-max rounded-lg w-max object-cover"
+
+        <div className="lg:col-span-5 order-1 lg:order-2">
+          {images && images[active] ? (
+            <div
+              className="relative w-full rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50 aspect-[4/3] flex items-center justify-center cursor-pointer"
               onMouseEnter={handleHoverStart}
               onMouseLeave={handleHoverEnd}
-            />
+              onClick={() => {
+                if (images.length > 1) {
+                  setActive((prevActive) => (prevActive + 1) % images.length);
+                }
+              }}
+            >
+              <Image
+                width={600}
+                height={450}
+                alt={`${title} image ${active + 1}`}
+                src={images[active]}
+                className="w-full h-full object-cover select-none transition-all duration-500"
+                priority={active === 0}
+              />
+            </div>
+          ) : (
+            <div className="w-full rounded-2xl bg-slate-100 aspect-[4/3] flex items-center justify-center border-2 border-dashed border-slate-200">
+              <span className="text-slate-400 text-sm">No image available</span>
+            </div>
           )}
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 }
 

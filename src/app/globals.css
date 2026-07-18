@@ -1,3 +1,84 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+    --font-heading: var(--font-outfit), system-ui, -apple-system, sans-serif;
+    
+    /* Design Tokens */
+    --color-primary-base: 250 84% 54%; /* Indigo-like accent */
+    --color-primary-light: 250 95% 76%;
+    --color-primary-dark: 250 75% 38%;
+    
+    --bg-gradient-start: 240 10% 3.9%;
+    --bg-gradient-end: 240 10% 10%;
+    
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    
+    --scrollbar-thumb: rgba(99, 102, 241, 0.4);
+    --scrollbar-track: rgba(241, 245, 249, 0.5);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    background-image: 
+      radial-gradient(rgba(99, 102, 241, 0.07) 1.2px, transparent 1.2px),
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 60%), 
+      radial-gradient(at 50% 0%, rgba(124, 58, 237, 0.04) 0px, transparent 60%), 
+      radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 60%);
+    background-size: 32px 32px, 100% 100%, 100% 100%, 100% 100%;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+}
+
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.6);
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+
+/* Squircle border shapes */
+.squircle-frame {
+  clip-path: inset(0% round 24px);
+}
+
+/* Micro-animations */
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+}

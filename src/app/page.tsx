@@ -20,83 +20,85 @@ export default function Portfolio() {
   const [userInfo, setUserInfo] = useState<DocumentData | undefined>(undefined);
   const [projectInfo, setProjectInfo] = useState<DocumentData[] | undefined>(
     []
-  ); // Array for multiple projects
-  const [isLoading, setIsLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<any>(null); // Track potential errors
-
-  const getUserData = async () => {
-    try {
-      const data = await getUserDataAPI();
-      if (data) {
-        if (data?.profileImg) {
-          const imgData = await getImage(data.profileImg);
-          setUserInfo({ ...data, profileImg: imgData });
-        } else {
-          setUserInfo(data);
-        }
-      }
-    } catch (err: any) {
-      setError(err); // Handle errors gracefully
-    } finally {
-      setIsLoading(false); // Update loading state after fetching
-    }
-  };
-
-  const getProjectDetails = async () => {
-    try {
-      const data = await getProjectDetailsAPI();
-      if (data) {
-        const updatedProjectInfo = await Promise.all(
-          data?.projects.map(async (project: any) => {
-            const images = await Promise.all(
-              project.images.map(async (image: string) => {
-                return await getImage(image);
-              })
-            );
-            return {
-              ...project,
-              images,
-            };
-          })
-        );
-        setProjectInfo(updatedProjectInfo);
-      }
-    } catch (err: any) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  );
+  const [dataReady, setDataReady] = useState(false);
 
   useEffect(() => {
-    getUserData();
-    getProjectDetails();
+    const loadData = async () => {
+      try {
+        // Fetch both in parallel
+        const [userData, projectData] = await Promise.allSettled([
+          getUserDataAPI(),
+          getProjectDetailsAPI(),
+        ]);
+
+        // Process user data
+        if (userData.status === "fulfilled" && userData.value) {
+          const data = userData.value;
+          let profileImgUrl = "";
+          if (data.profileImg) {
+            profileImgUrl = await getImage(data.profileImg);
+          }
+
+          let resolvedCompanies = [];
+          if (data.companies && Array.isArray(data.companies)) {
+            resolvedCompanies = await Promise.all(
+              data.companies.map(async (company: any) => {
+                let logoUrl = "";
+                if (company.Img) {
+                  logoUrl = await getImage(company.Img);
+                }
+                return {
+                  ...company,
+                  logoUrl: logoUrl || company.Img,
+                };
+              })
+            );
+          }
+
+          setUserInfo({
+            ...data,
+            profileImg: profileImgUrl || data.profileImg,
+            companies: resolvedCompanies,
+          });
+        }
+
+        // Process project data
+        if (projectData.status === "fulfilled" && projectData.value) {
+          const data = projectData.value;
+          const updatedProjectInfo = await Promise.all(
+            data.projects.map(async (project: any) => {
+              const images = await Promise.all(
+                project.images.map(async (image: string) => {
+                  return await getImage(image);
+                })
+              );
+              return { ...project, images };
+            })
+          );
+          setProjectInfo(updatedProjectInfo);
+        }
+      } catch (err: any) {
+        console.error("Error loading portfolio data:", err);
+      } finally {
+        setDataReady(true);
+      }
+    };
+
+    loadData();
   }, []);
 
   return (
     <>
-      {isLoading ? (
-        <div className="flex justify-center items-center h-screen">
-          <div className="loading">
-            <div className="h-3 w-3 bg-blue-500 rounded-full animate-ping"></div>
-            <div className="h-3 w-3 bg-red-500 rounded-full animate-pulse delay-100"></div>
-            <div className="h-3 w-3 bg-yellow-500 rounded-full animate-bounce delay-200"></div>
-          </div>
-        </div>
-      ) : error ? (
-        <div>Error: {error.message}</div>
-      ) : (
-        <>
-          <Navbar />
-          <Hero userInfo={userInfo} />
-          <Resume />
-          <Projects projectInfo={projectInfo} />
-          <Skills />
-          <PopularClients />
-          <ContactForm userInfo={userInfo} />
-          <Footer />
-        </>
-      )}
+      <Navbar />
+      <Hero userInfo={userInfo} isLoading={!dataReady} />
+      <Projects projectInfo={projectInfo} isLoading={!dataReady} />
+      <Skills />
+      <Resume />
+      <PopularClients companies={userInfo?.companies} isLoading={!dataReady} />
+      <ContactForm userInfo={userInfo} />
+      <Footer />
     </>
   );
 }
+

@@ -1,103 +1,121 @@
 "use client";
 
-import { Typography, Card, CardBody, Button } from "@material-tailwind/react";
+import { Typography, Button } from "@material-tailwind/react";
 import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/solid";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 export function ContactForm({ userInfo }: { userInfo: any }) {
   const handleClick = () => {
     const subject = "Inquiry from your website";
-    const recipientEmail = userInfo?.email;
+    const recipientEmail = userInfo?.email || "shubhanshu1997jagwan@gmail.com";
     window.location.href = `mailto:${recipientEmail}?subject=${subject}`;
   };
+
   return (
-    <section className="px-8 py-8" id="contact">
-      <Card
-        shadow={false}
-        className="container mx-auto border-t border-gray-200 pt-12"
-        placeholder={undefined}
-      >
-        <CardBody
-          className="flex flex-col items-center justify-center md:gap-10 p-0"
-          placeholder={undefined}
-        >
-          <div className="container mx-auto mb-10 text-center">
-            <Typography
-              variant="h1"
-              color="blue-gray"
-              className="mb-4"
-              placeholder={undefined}
-            >
-              Contact Us
-            </Typography>
-            <Typography
-              variant="lead"
-              className="mx-auto w-full !text-gray-500"
-              placeholder={undefined}
-            >
-              Ready to get started? Feel free to reach out through the contact
-              form, and let&apos;s embark on a journey of innovation and
-              success.
-            </Typography>
-          </div>
-          <div className="w-full col-span-3 rounded-lg h-full py-8 p-4 md:p-8 bg-gray-900 sm:w-3/5 ">
-            <Typography
-              variant="h4"
-              color="white"
-              className="mb-2"
-              placeholder={undefined}
-            >
-              Contact Information
-            </Typography>
-            <Typography
-              variant="lead"
-              className="mx-auto mb-8 text-base !text-gray-500"
-              placeholder={undefined}
-            >
-              Ready to get started? Click the button below to open your email
-              client and send us a message.
-            </Typography>
-            <div className="flex gap-2 md:gap-5">
-              <PhoneIcon className="h-5 w-5 text-white" />
-              <Typography variant="h6" color="white" placeholder={undefined}>
-                +91 {userInfo?.phoneNumber}
-              </Typography>
-            </div>
-            <div className="flex my-2 gap-2 md:gap-5">
-              <EnvelopeIcon className="h-5 w-5 text-white" />
-              <Typography variant="h6" color="white" placeholder={undefined}>
-                {userInfo?.email}
-              </Typography>
-            </div>
-            <div className="flex items-center gap-5 my-2">
-              <a
-                href={userInfo?.githubUrl}
-                target="_blank"
-                className="font-medium transition-colors w-max text-white hover:text-blue-500 underline"
+    <section className="px-6 py-20 bg-white" id="contact">
+      <div className="container mx-auto">
+        <ScrollReveal className="mb-16 text-center max-w-2xl mx-auto">
+          <Typography
+            className="mb-2 text-indigo-600 font-bold uppercase tracking-widest text-sm"
+            placeholder={undefined}
+          >
+            Get In Touch
+          </Typography>
+          <Typography
+            variant="h2"
+            className="text-3xl md:text-4xl font-extrabold text-slate-900 font-heading mb-4"
+            placeholder={undefined}
+          >
+            Let&apos;s Work Together
+          </Typography>
+          <Typography
+            variant="lead"
+            className="text-slate-500 font-normal leading-relaxed text-base font-sans"
+            placeholder={undefined}
+          >
+            Have a project in mind? I&apos;d love to hear about it. Drop me a
+            message and let&apos;s build something great together.
+          </Typography>
+        </ScrollReveal>
+
+        <ScrollReveal delay={150}>
+          <div className="w-full max-w-2xl mx-auto rounded-[2rem] bg-slate-900 border border-slate-800 p-8 md:p-12 shadow-xl shadow-slate-900/10 text-white relative overflow-hidden">
+            {/* Subtle decorative glow */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="relative z-10">
+              <Typography
+                variant="h4"
+                className="text-2xl font-bold font-heading mb-4 text-white"
+                placeholder={undefined}
               >
-                GitHub
-              </a>
-              <a
-                href={userInfo?.linkedInUrl}
-                target="_blank"
-                className="font-medium transition-colors text-white hover:text-blue-500 underline"
+                Contact Information
+              </Typography>
+              <Typography
+                className="mb-8 text-slate-400 font-normal leading-relaxed text-base font-sans"
+                placeholder={undefined}
               >
-                LinkedIn
-              </a>
+                Click the button below to draft a message in your default email client.
+              </Typography>
+
+              <div className="flex flex-col gap-4 mb-8">
+                {userInfo?.phoneNumber && (
+                  <div className="flex items-center gap-4 text-slate-300">
+                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700/50">
+                      <PhoneIcon className="h-5 w-5 text-indigo-400" />
+                    </div>
+                    <Typography className="font-semibold font-sans text-base" placeholder={undefined}>
+                      +91 {userInfo.phoneNumber}
+                    </Typography>
+                  </div>
+                )}
+                {userInfo?.email && (
+                  <div className="flex items-center gap-4 text-slate-300">
+                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700/50">
+                      <EnvelopeIcon className="h-5 w-5 text-indigo-400" />
+                    </div>
+                    <Typography className="font-semibold font-sans text-base" placeholder={undefined}>
+                      {userInfo.email}
+                    </Typography>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-4 items-center mb-8 border-t border-slate-800 pt-6">
+                {userInfo?.githubUrl && (
+                  <a
+                    href={userInfo.githubUrl}
+                    target="_blank"
+                    className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700/40 hover:border-slate-600 transition-all duration-200"
+                  >
+                    GitHub
+                  </a>
+                )}
+                {userInfo?.linkedInUrl && (
+                  <a
+                    href={userInfo.linkedInUrl}
+                    target="_blank"
+                    className="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-900/30 hover:bg-indigo-900/50 text-indigo-200 border border-indigo-500/20 hover:border-indigo-500/30 transition-all duration-200"
+                  >
+                    LinkedIn
+                  </a>
+                )}
+              </div>
+
+              <Button
+                className="w-full sm:w-fit bg-white hover:bg-slate-100 text-slate-900 rounded-full capitalize font-bold text-sm tracking-wide shadow-md hover:shadow-lg transition-all duration-200 px-8 py-3"
+                placeholder={undefined}
+                onClick={handleClick}
+              >
+                Send Message
+              </Button>
             </div>
-            <Button
-              className="w-full md:w-fit mt-5"
-              color="white"
-              size="md"
-              placeholder={undefined}
-              onClick={handleClick}
-            >
-              Send message
-            </Button>
           </div>
-        </CardBody>
-      </Card>
+        </ScrollReveal>
+      </div>
     </section>
   );
 }
 
 export default ContactForm;
+
