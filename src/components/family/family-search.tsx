@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Input, Card } from "@material-tailwind/react";
+import { Card } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
 interface FamilyMember {
@@ -16,6 +16,7 @@ interface FamilySearchProps {
   setSearchQuery: (val: string) => void;
   familyData: FamilyMember[];
   onMemberSelect: (id: string) => void;
+  className?: string;
 }
 
 export function FamilySearch({
@@ -23,6 +24,7 @@ export function FamilySearch({
   setSearchQuery,
   familyData,
   onMemberSelect,
+  className,
 }: FamilySearchProps) {
   // Filter members matching search query
   const filteredSearch = searchQuery
@@ -32,17 +34,19 @@ export function FamilySearch({
     : [];
 
   return (
-    <div className="relative w-full sm:w-64">
-      <Input
-        type="text"
-        label="Search Ancestors"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        color="indigo"
-        icon={<MagnifyingGlassIcon className="h-5 w-5 text-slate-400" />}
-        className="bg-white rounded-xl focus:ring-0"
-        crossOrigin={undefined}
-      />
+    <div className={`relative ${className || "w-full sm:w-64"}`}>
+      <div className="relative w-full">
+        <input
+          type="text"
+          placeholder="Search relative by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-white text-slate-800 placeholder-slate-400 text-sm font-semibold pl-11 pr-4 py-3 rounded-2xl border border-slate-200/85 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 transition-all shadow-sm focus:shadow-md"
+        />
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" />
+        </div>
+      </div>
       
       {/* Autocomplete Search Result Dropdown */}
       {searchQuery && (

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Typography, Button, Card } from "@material-tailwind/react";
-import { ArrowRightOnRectangleIcon, ArrowLeftIcon, CheckCircleIcon, UserPlusIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { ArrowRightOnRectangleIcon, ArrowLeftIcon, CheckCircleIcon, UserPlusIcon, PlusIcon, HomeIcon, StarIcon } from "@heroicons/react/24/solid";
 import { checkPasscode, hasActiveSession, clearSession, fetchFamilyMembers, saveFamilyMember } from "../../firebase/family.utils";
 import {
   SecurityGate,
@@ -43,6 +43,8 @@ export default function FamilyPage() {
   // Genealogy Explorer States
   const [familyData, setFamilyData] = useState<FamilyMember[]>([]);
   const [activeMemberId, setActiveMemberId] = useState<string>("");
+  const [startMemberId, setStartMemberId] = useState<string>("shubhanshu");
+  const [showStartSelector, setShowStartSelector] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedMemberForDetail, setSelectedMemberForDetail] = useState<FamilyMember | null>(null);
@@ -60,6 +62,12 @@ export default function FamilyPage() {
   useEffect(() => {
     const authenticated = hasActiveSession();
     setIsAuthenticated(authenticated);
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("family_tree_start_member_id");
+      if (stored) {
+        setStartMemberId(stored);
+      }
+    }
     if (authenticated) {
       loadFamilyData();
     }
@@ -70,18 +78,38 @@ export default function FamilyPage() {
       const data = await fetchFamilyMembers();
       if (data && data.length > 0) {
         setFamilyData(data);
-        // Default to active member 'shubhanshu' if present, otherwise first available relative
-        const defaultDoc = data.find(m => m.id === "shubhanshu") || data[0];
-        setActiveMemberId(defaultDoc.id);
+        const storedId = typeof window !== "undefined" ? localStorage.getItem("family_tree_start_member_id") : null;
+        if (storedId && data.some(m => m.id === storedId)) {
+          setStartMemberId(storedId);
+          setActiveMemberId(storedId);
+          setShowStartSelector(false);
+        } else {
+          setShowStartSelector(true);
+        }
       } else {
         setFamilyData([]);
         setActiveMemberId("");
+        setShowStartSelector(false);
       }
     } catch (err) {
       console.warn("Firestore fetch failed:", err);
       setFamilyData([]);
       setActiveMemberId("");
     }
+  };
+
+  const handleSetAsStartMember = (memberId: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("family_tree_start_member_id", memberId);
+      setStartMemberId(memberId);
+    }
+  };
+
+  const handleSelectStartMemberInitial = (memberId: string) => {
+    handleSetAsStartMember(memberId);
+    setActiveMemberId(memberId);
+    setShowStartSelector(false);
+    setSearchQuery("");
   };
 
   const handleUnlock = async (e: React.FormEvent) => {
@@ -99,6 +127,12 @@ export default function FamilyPage() {
       if (isValid) {
         setIsAuthenticated(true);
         setPasscode("");
+        if (typeof window !== "undefined") {
+          const stored = localStorage.getItem("family_tree_start_member_id");
+          if (stored) {
+            setStartMemberId(stored);
+          }
+        }
         loadFamilyData();
       } else {
         setErrorMsg("Incorrect passcode. Access denied.");
@@ -295,8 +329,12 @@ export default function FamilyPage() {
       }
 
       // 4. Reload from Firestore and refocus the member
+      const isFirstMember = familyData.length === 0;
       await loadFamilyData();
       setActiveMemberId(slugId);
+      if (isFirstMember) {
+        handleSetAsStartMember(slugId);
+      }
     } catch (err) {
       console.error("Failed to save and link member:", err);
       throw err;
@@ -348,7 +386,7 @@ export default function FamilyPage() {
           </div>
 
           <div className="flex items-center gap-4 flex-wrap">
-            {familyData.length > 0 && (
+            {familyData.length > 0 && !showStartSelector && (
               <FamilySearch
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
@@ -357,15 +395,31 @@ export default function FamilyPage() {
               />
             )}
 
-            <Button
-              size="sm"
-              onClick={handleOpenAddNewMember}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl capitalize font-bold text-sm tracking-wide shadow-md px-4 py-2 transition-all"
-              placeholder={undefined}
-            >
-              <UserPlusIcon className="h-4 w-4" />
-              Add Member
-            </Button>
+            {familyData.length > 0 && !showStartSelector && activeMemberId !== startMemberId && (
+              <Button
+                size="sm"
+                variant="outlined"
+                onClick={() => handleNavigateToMember(startMemberId)}
+                className="flex items-center gap-1.5 border-slate-300 hover:border-slate-800 text-slate-600 hover:text-slate-900 rounded-xl capitalize font-bold text-sm tracking-wide bg-white hover:bg-slate-50 transition-all duration-150 py-2"
+                placeholder={undefined}
+                title="Return to starting family member"
+              >
+                <HomeIcon className="h-4 w-4 text-indigo-500" />
+                Go to Start Member
+              </Button>
+            )}
+
+            {!showStartSelector && (
+              <Button
+                size="sm"
+                onClick={handleOpenAddNewMember}
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl capitalize font-bold text-sm tracking-wide shadow-md px-4 py-2 transition-all"
+                placeholder={undefined}
+              >
+                <UserPlusIcon className="h-4 w-4" />
+                Add Member
+              </Button>
+            )}
 
             <Button
               size="sm"
@@ -430,7 +484,7 @@ export default function FamilyPage() {
         )}
 
         {/* View Mode Toggle Segmented Control */}
-        {familyData.length > 0 && (
+        {familyData.length > 0 && !showStartSelector && (
           <div className="flex justify-center mb-8">
             <div className="flex bg-slate-200/60 p-1 rounded-2xl border border-slate-300/10">
               <button
@@ -456,6 +510,49 @@ export default function FamilyPage() {
                 Full Family Tree
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Onboarding Start Member Selector Screen */}
+        {familyData.length > 0 && showStartSelector && (
+          <div className="flex justify-center items-center py-20 px-4">
+            <Card
+              className="p-8 md:p-12 border border-slate-200/60 bg-white/90 backdrop-blur-md shadow-2xl flex flex-col items-center justify-center text-center max-w-lg w-full rounded-[32px] relative overflow-visible"
+              placeholder={undefined}
+            >
+              {/* Subtle background glow decorator */}
+              <div className="absolute -right-20 -top-20 w-44 h-44 bg-indigo-100 rounded-full blur-3xl pointer-events-none opacity-60" />
+              <div className="absolute -left-20 -bottom-20 w-44 h-44 bg-pink-100 rounded-full blur-3xl pointer-events-none opacity-60" />
+
+              <div className="h-20 w-20 mb-6 flex items-center justify-center rounded-3xl bg-indigo-50/80 border border-indigo-100/50 text-indigo-600 shadow-inner relative z-10">
+                <StarIcon className="h-10 w-10 text-indigo-500 drop-shadow-sm animate-pulse" />
+              </div>
+
+              <Typography
+                variant="h4"
+                className="text-2xl md:text-3xl font-extrabold text-slate-900 font-heading mb-3 tracking-tight relative z-10"
+                placeholder={undefined}
+              >
+                Set Starting Point
+              </Typography>
+              <Typography
+                className="text-slate-500 font-normal leading-relaxed text-sm max-w-sm mb-8 font-sans relative z-10"
+                placeholder={undefined}
+              >
+                Choose the initial member to center your family tree around. Search by name to begin.
+              </Typography>
+
+              {/* Search bar autocomplete area */}
+              <div className="w-full relative z-50">
+                <FamilySearch
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  familyData={familyData}
+                  onMemberSelect={handleSelectStartMemberInitial}
+                  className="w-full"
+                />
+              </div>
+            </Card>
           </div>
         )}
 
@@ -494,7 +591,7 @@ export default function FamilyPage() {
         )}
 
         {/* Dynamic Pedigree Explorer Layout Canvas */}
-        {familyData.length > 0 && activeMember && viewMode === "hourglass" && (
+        {familyData.length > 0 && activeMember && viewMode === "hourglass" && !showStartSelector && (
           <FocusedTreeView
             activeMember={activeMember}
             father={father}
@@ -509,7 +606,7 @@ export default function FamilyPage() {
         )}
 
         {/* Full Family Tree View (View-Only) */}
-        {familyData.length > 0 && viewMode === "full" && (
+        {familyData.length > 0 && viewMode === "full" && !showStartSelector && (
           <FullTreeView
             familyData={familyData}
             activeMemberId={activeMemberId}

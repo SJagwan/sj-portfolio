@@ -119,3 +119,15 @@ To keep the family tree mathematically valid and prevent circular dependencies (
 - **Self-Healing Spouse Parent Resolver:** If a child has only one parent document ID set (e.g. only `fatherId`), the system automatically resolves the spouse of that parent (e.g. `mother`) via the spouse link, displaying them side-by-side as a couple (`Father ─ Mother`) on both Parent and Grandparent tiers.
 - **Descriptive Naming Standard:** All coding abbreviations (like `fatherGF`, `sibSet`, `gc`, `idx`) have been fully refactored to clear, long-form variables (`paternalGrandfather`, `siblingIdSet`, `grandchild`, `index`).
 - **Interactive Tracking Jumps:** Clicking any card inside the Full Tree switches the explorer view mode back to **Focused View** and calls the navigation history tracker `handleNavigateToMember(memberId)`, preserving breadcrumbs and allowing users to navigate and edit any relative dynamically.
+
+---
+
+## 10. Customizable Default Starting Point
+
+### Implementation
+- **Local Storage State Persistence:** Users can choose who the family tree centers on by default when the application loads. This state is saved in browser local storage under the `family_tree_start_member_id` key.
+- **First-Time Welcome Selector Screen:** If the database contains family members but no default starting member has been configured in `localStorage` yet, the application displays a prominent **"Set Starting Point"** welcome screen containing a clean, full-width search bar. This prevents empty states and prompts the user to search and select their default initial focused member to begin exploration.
+- **Top Actions Home Shortcut:** Added a **"Go to Start Member"** button (featuring a home icon) next to the search bar. This button acts as a home-key shortcut, resetting tree focus back to the default start member instantly from anywhere in the pedigree explorer.
+
+
+
