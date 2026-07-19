@@ -14,9 +14,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
-const db = getFirestore(app);
+export const db = getFirestore(app);
 export const getUserDataAPI = async () => {
   const docRef = doc(
     db,
@@ -45,7 +45,7 @@ export const getProjectDetailsAPI = async () => {
   }
 };
 
-const storage = getStorage();
+export const storage = getStorage();
 
 export const getImage = async (url) => {
   const storageRef = ref(storage, url);
