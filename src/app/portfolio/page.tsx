@@ -14,11 +14,11 @@ import {
   getProjectDetailsAPI,
   getImage,
 } from "@/firebase/firebase.utils";
-import { DocumentData } from "firebase/firestore";
+import { UserInfo, Project } from "@/types";
 
 export default function Portfolio() {
-  const [userInfo, setUserInfo] = useState<DocumentData | undefined>(undefined);
-  const [projectInfo, setProjectInfo] = useState<DocumentData[] | undefined>(
+  const [userInfo, setUserInfo] = useState<UserInfo | undefined>(undefined);
+  const [projectInfo, setProjectInfo] = useState<Project[] | undefined>(
     []
   );
   const [dataReady, setDataReady] = useState(false);

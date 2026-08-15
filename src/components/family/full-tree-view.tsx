@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Card, Typography } from "@material-tailwind/react";
-import { FamilyMember } from "./utils";
+import { FamilyMember, extractYear, formatLifespan } from "./utils";
 
 interface FullTreeViewProps {
   familyData: FamilyMember[];
@@ -23,8 +23,9 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
 
   // Helper to extract birth year for chronological sorting
   const getBirthYear = (member: FamilyMember): number => {
-    if (!member.birthDate) return Infinity;
-    const year = parseInt(member.birthDate.split("-")[0], 10);
+    const extracted = extractYear(member.birthDate);
+    if (!extracted) return Infinity;
+    const year = parseInt(extracted, 10);
     return isNaN(year) ? Infinity : year;
   };
 
@@ -42,12 +43,7 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
     isDeemphasized?: boolean;
   }) => {
     const isFemale = member.gender === "female";
-    const lifespan =
-      member.birthDate || member.deathDate
-        ? `(${member.birthDate?.split("-")[0] || "?"} — ${
-            member.deathDate?.split("-")[0] || (member.birthDate ? "Present" : "?")
-          })`
-        : "";
+    const lifespan = formatLifespan(member.birthDate, member.deathDate);
 
     return (
       <div

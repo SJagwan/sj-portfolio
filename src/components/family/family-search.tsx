@@ -3,13 +3,7 @@
 import React from "react";
 import { Card } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  gender: "male" | "female" | "other";
-  birthDate?: string;
-}
+import { FamilyMember } from "@/types";
 
 interface FamilySearchProps {
   searchQuery: string;

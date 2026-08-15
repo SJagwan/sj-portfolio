@@ -3,7 +3,7 @@
 import React from "react";
 import { Typography, Card } from "@material-tailwind/react";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { FamilyMember } from "./utils";
+import { FamilyMember, RelationshipType } from "@/types";
 import MemberCard from "./member-card";
 
 interface FocusedTreeViewProps {
@@ -17,7 +17,7 @@ interface FocusedTreeViewProps {
   onAddRelation: (
     refId: string,
     refName: string,
-    relType: "father" | "mother" | "spouse" | "child" | "sibling"
+    relType: RelationshipType
   ) => void;
   onViewDetails: (member: FamilyMember) => void;
 }

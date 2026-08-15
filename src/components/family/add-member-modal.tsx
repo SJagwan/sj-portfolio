@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Typography, Dialog, DialogBody, Button } from "@material-tailwind/react";
 import { UserPlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { FamilyMember, PrefilledRelation, getDescendants, getAncestors, generateUniqueSlug } from "./utils";
+import { FamilyMember, PrefilledRelation, Gender } from "@/types";
+import { getDescendants, getAncestors, generateUniqueSlug } from "./utils";
 import LinkMemberForm from "./link-member-form";
 import CreateMemberForm from "./create-member-form";
 
@@ -35,7 +36,7 @@ export function AddMemberModal({
   const [selectedLinkRelatives, setSelectedLinkRelatives] = useState<string[]>([]);
 
   const [name, setName] = useState("");
-  const [gender, setGender] = useState<"male" | "female" | "other">("male");
+  const [gender, setGender] = useState<Gender>("male");
   const [birthDate, setBirthDate] = useState("");
   const [deathDate, setDeathDate] = useState("");
   const [birthPlace, setBirthPlace] = useState("");
@@ -171,16 +172,15 @@ export function AddMemberModal({
       const isSibling = (m: FamilyMember) => {
         if (!current) return false;
         return (
-          (current.fatherId && m.fatherId === current.fatherId) ||
-          (current.motherId && m.motherId === current.motherId)
+          Boolean(current.fatherId && m.fatherId && m.fatherId === current.fatherId) ||
+          Boolean(current.motherId && m.motherId && m.motherId === current.motherId)
         );
       };
       list = list.filter(
         (m) =>
           !descendants.has(m.id) &&
           !ancestors.has(m.id) &&
-          !isSibling(m) &&
-          (!current || m.id !== current.spouseId)
+          !isSibling(m)
       );
     } else if (relationType === "child") {
       list = list.filter(
@@ -318,14 +318,14 @@ export function AddMemberModal({
   }, [existingMembers, currentMemberId, editDescendants]);
 
   const potentialSpouses = useMemo(() => {
-    let list = existingMembers.filter((m) => m.id !== spouseId);
+    let list = existingMembers;
     if (currentMemberId) {
       const current = existingMembers.find((m) => m.id === currentMemberId);
       const isSibling = (m: FamilyMember) => {
         if (!current) return false;
         return (
-          (current.fatherId && m.fatherId === current.fatherId) ||
-          (current.motherId && m.motherId === current.motherId)
+          Boolean(current.fatherId && m.fatherId && m.fatherId === current.fatherId) ||
+          Boolean(current.motherId && m.motherId && m.motherId === current.motherId)
         );
       };
       list = list.filter(
@@ -337,7 +337,7 @@ export function AddMemberModal({
       );
     }
     return list;
-  }, [existingMembers, currentMemberId, editDescendants, editAncestors, spouseId]);
+  }, [existingMembers, currentMemberId, editDescendants, editAncestors]);
 
   const siblingOptions = useMemo(() => {
     if (!prefilledRelation || (prefilledRelation.relationType !== "father" && prefilledRelation.relationType !== "mother")) {

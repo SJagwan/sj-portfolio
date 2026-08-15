@@ -3,16 +3,7 @@
 import React from "react";
 import { Typography, Card, Button } from "@material-tailwind/react";
 import { UserIcon, HeartIcon, AcademicCapIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  gender: "male" | "female" | "other";
-  birthDate?: string;
-  deathDate?: string;
-  birthPlace?: string;
-  bio?: string;
-}
+import { FamilyMember } from "@/types";
 
 interface MemberCardProps {
   member?: FamilyMember;

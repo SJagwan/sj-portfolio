@@ -2,13 +2,13 @@
 
 import React from "react";
 import { Typography } from "@material-tailwind/react";
-import { FamilyMember, PrefilledRelation } from "./utils";
+import { FamilyMember, PrefilledRelation, Gender } from "@/types";
 
 interface CreateMemberFormProps {
   name: string;
   setName: (v: string) => void;
-  gender: "male" | "female" | "other";
-  setGender: (g: "male" | "female" | "other") => void;
+  gender: Gender;
+  setGender: (g: Gender) => void;
   birthPlace: string;
   setBirthPlace: (v: string) => void;
   birthDate: string;
@@ -90,7 +90,6 @@ export function CreateMemberForm({
           >
             <option value="male">Male</option>
             <option value="female">Female</option>
-            <option value="other">Other</option>
           </select>
         </div>
         <div>

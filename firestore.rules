@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Portfolio user collections (updated from user to sj)
+    match /sj/{document} {
+      allow read: if true;
+      allow write: if false; // Kept secure
+    }
+    match /user/{document} {
+      allow read: if true;
+      allow write: if false; // Kept secure
+    }
+    
+    // Gatekeeper passcode hashes
+    // 'get' allows checking a specific passcode hash; 'list: false' prevents dumping the collection
+    match /gatekeeper/{hash} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if false;
+    }
+
+    // Family Genealogy Members (Read & Write)
+    match /family_members/{member} {
+      allow read, write: if true; 
+    }
+  }
+}

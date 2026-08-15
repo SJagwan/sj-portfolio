@@ -2,7 +2,8 @@
 
 import React from "react";
 import { Typography } from "@material-tailwind/react";
-import { FamilyMember, PrefilledRelation } from "./utils";
+import { FamilyMember, PrefilledRelation } from "@/types";
+import { extractYear } from "./utils";
 
 interface LinkMemberFormProps {
   eligibleLinkMembers: FamilyMember[];
@@ -60,9 +61,9 @@ export function LinkMemberForm({
                   />
                   <div>
                     <span className="text-sm font-semibold block">{m.name}</span>
-                    {m.birthDate && (
+                    {m.birthDate && extractYear(m.birthDate) && (
                       <span className="text-[10px] text-slate-400 font-medium">
-                        b. {m.birthDate.split("-")[0]}
+                        b. {extractYear(m.birthDate)}
                       </span>
                     )}
                   </div>

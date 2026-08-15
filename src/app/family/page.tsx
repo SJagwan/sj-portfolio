@@ -3,7 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Button, Card } from "@material-tailwind/react";
 import { ArrowRightOnRectangleIcon, ArrowLeftIcon, CheckCircleIcon, UserPlusIcon, PlusIcon, HomeIcon, StarIcon } from "@heroicons/react/24/solid";
-import { checkPasscode, hasActiveSession, clearSession, fetchFamilyMembers, saveFamilyMember } from "../../firebase/family.utils";
+import {
+  checkPasscode,
+  hasActiveSession,
+  clearSession,
+  fetchFamilyMembers,
+  saveFamilyMember,
+  deleteFamilyMemberAPI,
+} from "../../firebase/family.utils";
 import {
   SecurityGate,
   MemberCard,
@@ -13,26 +20,7 @@ import {
   FocusedTreeView
 } from "../../components/family";
 import FullTreeView from "../../components/family/full-tree-view";
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  gender: "male" | "female" | "other";
-  birthDate?: string;
-  deathDate?: string;
-  birthPlace?: string;
-  bio?: string;
-  photoUrl?: string;
-  fatherId?: string;
-  motherId?: string;
-  spouseId?: string;
-}
-
-interface PrefilledRelation {
-  memberId: string;
-  memberName: string;
-  relationType: "father" | "mother" | "spouse" | "child" | "sibling";
-}
+import { FamilyMember, PrefilledRelation } from "@/types";
 
 export default function FamilyPage() {
   const [passcode, setPasscode] = useState("");
@@ -295,15 +283,6 @@ export default function FamilyPage() {
               
               await saveFamilyMember(slugId, updateObj);
               await saveFamilyMember(active.id, updateObj);
-            } else {
-              // Self-healing: create a placeholder father to establish relation link
-              const placeholderFatherId = `father-of-${active.id}`;
-              await saveFamilyMember(placeholderFatherId, {
-                name: `Father of ${active.name}`,
-                gender: "male"
-              });
-              await saveFamilyMember(active.id, { fatherId: placeholderFatherId });
-              await saveFamilyMember(slugId, { fatherId: placeholderFatherId });
             }
           }
         }
@@ -337,6 +316,30 @@ export default function FamilyPage() {
       }
     } catch (err) {
       console.error("Failed to save and link member:", err);
+      throw err;
+    }
+  };
+
+  const handleDeleteMember = async (memberId: string) => {
+    try {
+      await deleteFamilyMemberAPI(memberId, familyData);
+      setIsDetailOpen(false);
+      setIsAddOpen(false);
+      await loadFamilyData();
+
+      // If active member was deleted, navigate to start member or first remaining
+      if (memberId === activeMemberId) {
+        const remaining = familyData.filter(m => m.id !== memberId);
+        if (remaining.length > 0) {
+          const nextId = remaining.some(m => m.id === startMemberId) ? startMemberId : remaining[0].id;
+          setActiveMemberId(nextId);
+        } else {
+          setActiveMemberId("");
+          setShowStartSelector(true);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete member:", err);
       throw err;
     }
   };
@@ -623,6 +626,7 @@ export default function FamilyPage() {
           onClose={() => setIsDetailOpen(false)}
           member={selectedMemberForDetail}
           onEdit={handleOpenEditMember}
+          onDelete={handleDeleteMember}
         />
 
         {/* Add Family Member Modal */}

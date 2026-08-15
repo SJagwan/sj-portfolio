@@ -1,22 +1,6 @@
-export interface FamilyMember {
-  id: string;
-  name: string;
-  gender: "male" | "female" | "other";
-  birthDate?: string;
-  deathDate?: string;
-  birthPlace?: string;
-  bio?: string;
-  photoUrl?: string;
-  fatherId?: string;
-  motherId?: string;
-  spouseId?: string;
-}
+import { FamilyMember, PrefilledRelation, Gender, RelationshipType } from "@/types";
 
-export interface PrefilledRelation {
-  memberId: string;
-  memberName: string;
-  relationType: "father" | "mother" | "spouse" | "child" | "sibling";
-}
+export type { FamilyMember, PrefilledRelation, Gender, RelationshipType };
 
 /**
  * Computes all descendants recursively for a given member in O(N) using pre-built lookup maps.
@@ -95,4 +79,27 @@ export function generateUniqueSlug(name: string, existingIds: Set<string>): stri
     counter++;
   }
   return slug;
+}
+
+/**
+ * Extracts a 4-digit calendar year from various date string formats
+ * (e.g., "1997-05-12", "12/05/1997", "May 1997", "1997", "c. 1997").
+ */
+export function extractYear(dateStr?: string): string | null {
+  if (!dateStr || typeof dateStr !== "string") return null;
+  const match = dateStr.match(/\b(1[6-9]|20)\d{2}\b/);
+  return match ? match[0] : null;
+}
+
+/**
+ * Formats a lifespan string like "(1940 — 2012)" or "(1995 — Present)" or ""
+ */
+export function formatLifespan(birthDate?: string, deathDate?: string): string {
+  const birthYear = extractYear(birthDate);
+  const deathYear = extractYear(deathDate);
+
+  if (!birthYear && !deathYear) return "";
+  if (birthYear && deathYear) return `(${birthYear} — ${deathYear})`;
+  if (birthYear && !deathYear) return `(${birthYear} — Present)`;
+  return `(? — ${deathYear})`;
 }
