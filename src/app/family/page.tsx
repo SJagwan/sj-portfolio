@@ -5,7 +5,6 @@ import { Typography, Button } from "@material-tailwind/react";
 import {
   ArrowRightOnRectangleIcon,
   ArrowLeftIcon,
-  CheckCircleIcon,
   UserPlusIcon,
   HomeIcon,
   ArrowDownTrayIcon,
@@ -22,7 +21,6 @@ import {
 } from "../../firebase/family.utils";
 import {
   SecurityGate,
-  MemberCard,
   FamilySearch,
   MemberDetailsModal,
   AddMemberModal,
@@ -42,7 +40,6 @@ export default function FamilyPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Genealogy Explorer States
   const [familyData, setFamilyData] = useState<FamilyMember[]>([]);
   const [activeMemberId, setActiveMemberId] = useState<string>("");
   const [startMemberId, setStartMemberId] = useState<string>("shubhanshu");
@@ -51,17 +48,14 @@ export default function FamilyPage() {
   const [selectedMemberForDetail, setSelectedMemberForDetail] =
     useState<FamilyMember | null>(null);
 
-  // Add Member Modal States
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [prefilledRelation, setPrefilledRelation] =
     useState<PrefilledRelation | null>(null);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [viewMode, setViewMode] = useState<"hourglass" | "full">("hourglass");
 
-  // Navigation Trail Stack
   const [historyStack, setHistoryStack] = useState<string[]>([]);
 
-  // Check for active session on mount
   useEffect(() => {
     const session = getActiveSession();
     setIsAuthenticated(session.isAuthenticated);
@@ -229,12 +223,10 @@ export default function FamilyPage() {
     siblingLinkIds?: string[],
   ) => {
     try {
-      // 1. Save or update member record to database
       if (Object.keys(memberData).length > 0) {
         await saveFamilyMember(slugId, memberData);
       }
 
-      // 2. If relationship context is pre-filled, update the links
       if (relationshipLink) {
         const refId = relationshipLink.memberId;
         const relType = relationshipLink.relationType;
@@ -247,7 +239,6 @@ export default function FamilyPage() {
             }
           }
 
-          // Auto-link Father and Mother as spouses if child already has a mother and neither has another spouse
           const childMember = familyData.find((m) => m.id === refId);
           if (childMember?.motherId) {
             const motherDoc = familyData.find((m) => m.id === childMember.motherId);
@@ -265,7 +256,6 @@ export default function FamilyPage() {
             }
           }
 
-          // Auto-link Father and Mother as spouses if child already has a father and neither has another spouse
           const childMember = familyData.find((m) => m.id === refId);
           if (childMember?.fatherId) {
             const fatherDoc = familyData.find((m) => m.id === childMember.fatherId);
@@ -276,7 +266,6 @@ export default function FamilyPage() {
             }
           }
         } else if (relType === "spouse") {
-          // Double link spouses to each other
           await saveFamilyMember(refId, { spouseId: slugId });
           await saveFamilyMember(slugId, { spouseId: refId });
           if (siblingLinkIds && siblingLinkIds.length > 0) {
@@ -328,7 +317,6 @@ export default function FamilyPage() {
         }
       }
 
-      // 3. If editing, handle reciprocal relationship changes (like spouse links)
       if (isEdit) {
         const original = familyData.find((m) => m.id === slugId);
         if (original) {
@@ -345,7 +333,6 @@ export default function FamilyPage() {
         }
       }
 
-      // 4. Reload from Firestore and refocus the member
       const isFirstMember = familyData.length === 0;
       await loadFamilyData();
       setActiveMemberId(slugId);
@@ -382,7 +369,6 @@ export default function FamilyPage() {
     }
   };
 
-  // Build active member's immediate family nodes
   const activeMember = familyData.find((m) => m.id === activeMemberId);
   const father = activeMember?.fatherId
     ? familyData.find((m) => m.id === activeMember.fatherId)
@@ -425,7 +411,6 @@ export default function FamilyPage() {
     }
   };
 
-  // 1. Initial Session Check Screen
   if (isAuthenticated === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
@@ -439,7 +424,6 @@ export default function FamilyPage() {
     );
   }
 
-  // 2. Unauthenticated Security Gate Screen
   if (!isAuthenticated) {
     return (
       <SecurityGate
@@ -455,7 +439,6 @@ export default function FamilyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-indigo-50/20 to-white text-slate-900 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {/* Header Bar */}
         <header className="mb-6 border-b border-slate-200/80 pb-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -482,7 +465,6 @@ export default function FamilyPage() {
               </p>
             </div>
 
-            {/* Top Primary Actions */}
             <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
               {isAdmin ? (
                 <>
@@ -523,7 +505,6 @@ export default function FamilyPage() {
             </div>
           </div>
 
-          {/* Search & Quick Nav Bar */}
           {familyData.length > 0 && (
             <div className="mt-5 flex items-center gap-2.5 max-w-lg">
               <FamilySearch
@@ -551,10 +532,8 @@ export default function FamilyPage() {
           )}
         </header>
 
-        {/* View Mode Toggle & Export Controls */}
         {familyData.length > 0 && (
           <div className="flex items-center justify-center gap-3 mb-8 flex-wrap">
-            {/* Quick Back Button */}
             {historyStack.length > 0 && (
               <button
                 type="button"
@@ -592,7 +571,6 @@ export default function FamilyPage() {
               </button>
             </div>
 
-            {/* Download Family Photo Button */}
             {activeMember && (
               <button
                 type="button"
@@ -614,9 +592,6 @@ export default function FamilyPage() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW RENDERING */}
-        {/* ========================================================================= */}
         {familyData.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border border-slate-100 shadow-xl max-w-lg mx-auto mt-10">
             <Typography
@@ -663,7 +638,6 @@ export default function FamilyPage() {
         ) : null}
       </div>
 
-      {/* Member Details Modal */}
       <MemberDetailsModal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
@@ -673,7 +647,6 @@ export default function FamilyPage() {
         canEdit={isAdmin}
       />
 
-      {/* Add / Edit Member Modal */}
       <AddMemberModal
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
@@ -683,7 +656,6 @@ export default function FamilyPage() {
         onSubmit={handleSaveMemberAndLink}
       />
 
-      {/* Admin Unlock Modal */}
       <AdminUnlockModal
         isOpen={isUnlockModalOpen}
         onClose={() => setIsUnlockModalOpen(false)}

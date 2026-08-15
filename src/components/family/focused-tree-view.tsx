@@ -40,9 +40,7 @@ export function FocusedTreeView({
       id="focused-tree-canvas"
       className="flex flex-col items-center w-full max-w-5xl mx-auto py-6 px-4 sm:px-8 bg-slate-50/40 rounded-3xl select-none"
     >
-      {/* ========================================================================= */}
-      {/* 1. PARENTS LEVEL (ABOVE) */}
-      {/* ========================================================================= */}
+      {/* Parents Level */}
       <div className="flex flex-col items-center w-full">
         <div className="flex items-center gap-2 mb-3">
           <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
@@ -80,18 +78,15 @@ export function FocusedTreeView({
           />
         </div>
 
-        {/* Tree Branch: Vertical connector from parents down to focus node */}
         <div className="flex flex-col items-center my-1">
           <div className="w-0.5 h-6 sm:h-8 bg-gradient-to-b from-slate-300 to-indigo-300 rounded-full" />
           <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-sm -mt-0.5" />
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. PRIMARY FOCUS LEVEL (CENTER) */}
-      {/* ========================================================================= */}
+      {/* Primary Focus Level */}
       <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-12 relative w-full justify-center my-3">
-        {/* Siblings Panel (Left Side) */}
+        {/* Siblings Panel */}
         <div className="flex flex-col gap-2 sm:absolute sm:right-[72%] lg:right-[68%] items-center sm:items-end w-full sm:w-44">
           <div className="flex items-center gap-1.5 justify-center sm:justify-end w-full pr-1">
             <Typography
@@ -168,7 +163,7 @@ export function FocusedTreeView({
           )}
         </div>
 
-        {/* Primary Centered Focus Node */}
+        {/* Primary Focus Node */}
         <MemberCard
           member={activeMember}
           label="Active Focus"
@@ -176,7 +171,7 @@ export function FocusedTreeView({
           onViewDetails={() => onViewDetails(activeMember)}
         />
 
-        {/* Spouse/Partner (Right Side) */}
+        {/* Spouse Panel */}
         <div className="flex items-center sm:absolute sm:left-[72%] lg:left-[68%]">
           <MemberCard
             member={spouse}
@@ -192,11 +187,8 @@ export function FocusedTreeView({
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. CHILDREN LEVEL (BELOW) */}
-      {/* ========================================================================= */}
+      {/* Children Level */}
       <div className="flex flex-col items-center w-full mt-1">
-        {/* Downward Tree Connector */}
         <div className="flex flex-col items-center my-1">
           <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-sm mb-0.5" />
           <div className="w-0.5 h-6 sm:h-8 bg-gradient-to-b from-indigo-300 to-slate-300 rounded-full" />

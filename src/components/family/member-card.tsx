@@ -26,12 +26,10 @@ export function MemberCard({
   const labelLower = label.toLowerCase();
   const isSpouse = labelLower === "spouse" || labelLower === "wife" || labelLower === "husband";
   
-  // Robust detection: Explicit gender OR implied relation role
   const isFemale =
     member?.gender?.toLowerCase() === "female" ||
     ["mother", "daughter", "sister", "wife"].includes(labelLower);
 
-  // 1. Fallback rendering for undefined relatives (Add Slot)
   if (!member) {
     const isInteractive = !!onViewDetails;
     const isFemaleSlot = ["mother", "daughter", "sister", "wife"].includes(labelLower);
@@ -78,7 +76,6 @@ export function MemberCard({
     );
   }
 
-  // 2. Active Focus Member Card (Primary node with glowing border and full details)
   if (isActive) {
     return (
       <div
@@ -140,7 +137,6 @@ export function MemberCard({
     );
   }
 
-  // 3. Standard Relatives Node Card
   const renderIcon = () => {
     if (member.photoUrl) {
       return (
@@ -183,7 +179,6 @@ export function MemberCard({
         onClick={onClick}
         className={`p-4 sm:p-5 ${getCardStyling()} cursor-pointer transition-all duration-200 w-40 sm:w-48 text-center rounded-2xl flex flex-col items-center relative select-none`}
       >
-        {/* Quick View Button on top-right */}
         {onQuickView && (
           <button
             type="button"

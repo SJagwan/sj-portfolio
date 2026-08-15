@@ -38,7 +38,7 @@ export function MemberDetailsModal({
       await onDelete(member.id);
       setIsConfirmingDelete(false);
     } catch (err) {
-      console.error(err);
+      console.error("Delete member failed:", err);
     } finally {
       setIsDeleting(false);
     }
@@ -205,7 +205,6 @@ export function MemberDetailsModal({
               </div>
             </div>
           ) : (
-            /* Actions */
             <div className="flex flex-wrap justify-between items-center gap-3 pt-2 border-t border-slate-100/80">
               {canEdit && onDelete ? (
                 <button

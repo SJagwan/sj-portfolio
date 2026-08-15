@@ -86,7 +86,7 @@ export function CreateMemberForm({
           </label>
           <select
             value={gender}
-            onChange={(e) => setGender(e.target.value as any)}
+            onChange={(e) => setGender(e.target.value as Gender)}
             className="w-full bg-white border border-slate-200 text-slate-855 text-sm rounded-xl p-3 outline-none transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             disabled={
               !!prefilledRelation &&
