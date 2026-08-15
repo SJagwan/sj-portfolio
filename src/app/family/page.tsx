@@ -199,8 +199,13 @@ export default function FamilyPage() {
     if (!activeMember) return;
     try {
       setIsExporting(true);
-      const filename = `${activeMember.name.replace(/\s+/g, "_")}_Family_Lineage.png`;
-      await exportTreeToPng("focused-tree-canvas", filename);
+      const filename =
+        viewMode === "hourglass"
+          ? `${activeMember.name.replace(/\s+/g, "_")}_Focused_Family_Photo.png`
+          : `${activeMember.name.replace(/\s+/g, "_")}_Full_Family_Tree.png`;
+      const canvasId =
+        viewMode === "hourglass" ? "focused-tree-canvas" : "full-tree-canvas";
+      await exportTreeToPng(canvasId, filename);
     } catch (err) {
       console.error("Export error:", err);
     } finally {
@@ -553,8 +558,8 @@ export default function FamilyPage() {
               </button>
             </div>
 
-            {/* Focused View Download Picture Button */}
-            {viewMode === "hourglass" && activeMember && (
+            {/* Download Family Photo Button */}
+            {activeMember && (
               <button
                 type="button"
                 onClick={handleExportTree}
@@ -630,8 +635,8 @@ export default function FamilyPage() {
             activeMemberId={activeMemberId}
             onSelectMember={(memberId) => {
               handleNavigateToMember(memberId);
-              setViewMode("hourglass");
             }}
+            onViewDetails={openDetails}
           />
         )}
 

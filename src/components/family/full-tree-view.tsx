@@ -1,17 +1,31 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, Typography } from "@material-tailwind/react";
-import { FamilyMember, extractYear, formatLifespan } from "./utils";
+import {
+  MagnifyingGlassPlusIcon,
+  MagnifyingGlassMinusIcon,
+  ArrowPathIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/solid";
+import { FamilyMember, extractYear } from "./utils";
 
 interface FullTreeViewProps {
   familyData: FamilyMember[];
   activeMemberId: string;
   onSelectMember: (id: string) => void;
+  onViewDetails?: (member: FamilyMember) => void;
 }
 
-export function FullTreeView({ familyData, activeMemberId, onSelectMember }: FullTreeViewProps) {
+export function FullTreeView({
+  familyData,
+  activeMemberId,
+  onSelectMember,
+  onViewDetails,
+}: FullTreeViewProps) {
+  const [zoom, setZoom] = useState<number>(1);
+
   // Index family members by ID for fast lookup access
   const memberMap = useMemo(() => {
     return new Map(familyData.map((member) => [member.id, member]));
@@ -32,7 +46,7 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
 
   /**
    * Component: MemberNodeCard
-   * Renders a single family member card with color-coded side borders and lifespan details.
+   * Renders a single family member card with color-coded side borders.
    */
   const MemberNodeCard = ({
     member,
@@ -44,44 +58,73 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
     isDeemphasized?: boolean;
   }) => {
     const isFemale = member.gender === "female";
-    const lifespan = formatLifespan(member.birthDate, member.deathDate);
+
+    const getBorderClass = () => {
+      if (isCurrentFocus) {
+        return "border-l-indigo-600 border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-500/30 shadow-md";
+      }
+      if (isFemale) {
+        return "border-l-rose-400 border-rose-200/80 bg-rose-50/30 hover:border-rose-400 hover:bg-rose-50/60";
+      }
+      return "border-l-indigo-400 border-indigo-200/80 bg-indigo-50/30 hover:border-indigo-400 hover:bg-indigo-50/60";
+    };
 
     return (
-      <div
-        onClick={() => onSelectMember(member.id)}
-        className={`flex items-center gap-2 px-3 py-2 border rounded-xl bg-white hover:border-indigo-400 cursor-pointer shadow-sm hover:shadow transition-all duration-150 select-none min-w-[130px] max-w-[170px] shrink-0 border-l-4 ${
-          isCurrentFocus
-            ? "border-l-indigo-600 border-indigo-600 bg-indigo-50/10 ring-2 ring-indigo-500/20"
-            : isFemale
-            ? "border-l-pink-400 border-slate-200"
-            : "border-l-indigo-400 border-slate-200"
-        } ${isDeemphasized ? "opacity-70 hover:opacity-100" : ""}`}
-        title={isCurrentFocus ? "Currently Focused Member" : "Click to view family tree centered on this member"}
-      >
+      <div className="relative group">
         <div
-          className={`h-6 w-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold shrink-0 ${
-            isCurrentFocus
-              ? "bg-indigo-600 text-white"
-              : isFemale
-              ? "bg-rose-50 text-rose-600"
-              : "bg-indigo-50 text-indigo-600"
+          onClick={() => onSelectMember(member.id)}
+          className={`flex items-center gap-2 px-3 py-2 border rounded-xl cursor-pointer shadow-xs hover:shadow transition-all duration-150 select-none min-w-[140px] max-w-[200px] shrink-0 border-l-4 ${getBorderClass()} ${
+            isDeemphasized ? "opacity-75 hover:opacity-100" : ""
           }`}
+          title={
+            isCurrentFocus
+              ? "Currently Focused Member"
+              : `Click to center tree on ${member.name}`
+          }
         >
-          {member.photoUrl ? (
-            <img
-              src={member.photoUrl}
-              alt={member.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            member.name.charAt(0)
+          <div
+            className={`h-7 w-7 rounded-xl overflow-hidden flex items-center justify-center text-[10px] font-bold shrink-0 border shadow-inner ${
+              isCurrentFocus
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : isFemale
+                ? "bg-rose-50 text-rose-600 border-rose-200"
+                : "bg-indigo-50 text-indigo-600 border-indigo-200"
+            }`}
+          >
+            {member.photoUrl ? (
+              <img
+                src={member.photoUrl}
+                alt={member.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              member.name.charAt(0)
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p
+              className={`text-[11px] font-bold leading-snug whitespace-normal break-words ${
+                isCurrentFocus ? "text-indigo-950 font-extrabold" : "text-slate-900"
+              }`}
+            >
+              {member.name}
+            </p>
+          </div>
+
+          {/* Quick Profile Details Button */}
+          {onViewDetails && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails(member);
+              }}
+              className="no-export p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-white/80 transition-all opacity-0 group-hover:opacity-100 shrink-0"
+              title={`View ${member.name}'s Profile Details`}
+            >
+              <InformationCircleIcon className="h-3.5 w-3.5" />
+            </button>
           )}
-        </div>
-        <div className="min-w-0">
-          <p className={`text-[11px] font-bold leading-tight truncate ${isCurrentFocus ? "text-indigo-900" : "text-slate-900"}`}>
-            {member.name}
-          </p>
-          {lifespan && <p className="text-[8px] text-slate-400 font-semibold">{lifespan}</p>}
         </div>
       </div>
     );
@@ -108,7 +151,7 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
     return resolvedMother;
   }, [activeMember, memberMap]);
 
-  const hasParents = father || mother;
+  const hasParents = Boolean(father || mother);
 
   // 2. Resolve Paternal Grandparents with self-healing fallback
   const paternalGrandfather = useMemo(() => {
@@ -152,10 +195,11 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
     return gm;
   }, [mother, memberMap]);
 
-  const hasGrandparents = paternalGrandfather || paternalGrandmother || maternalGrandfather || maternalGrandmother;
+  const hasGrandparents = Boolean(
+    paternalGrandfather || paternalGrandmother || maternalGrandfather || maternalGrandmother
+  );
 
   // 4. Resolve Active Member's Siblings (Level 0)
-  // Combines parent object check + direct fatherId/motherId mapping for robust lookup
   const siblings = useMemo(() => {
     if (!activeMember) return [];
 
@@ -231,16 +275,29 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
   }, [father, paternalGrandfather, paternalGrandmother, familyData]);
 
   // Helper to render grandparent couple cards
-  const renderGrandparentsCouple = (gFather: FamilyMember | null, gMother: FamilyMember | null) => {
-    if (!gFather && !gMother) return <div className="min-w-[130px]" />;
+  const renderGrandparentsCouple = (
+    gFather: FamilyMember | null,
+    gMother: FamilyMember | null
+  ) => {
+    if (!gFather && !gMother) return null;
 
     return (
-      <div className="flex items-center gap-1.5 bg-slate-50/50 p-2 rounded-2xl border border-slate-200/40 shadow-sm z-10 shrink-0">
-        {gFather && <MemberNodeCard member={gFather} isCurrentFocus={gFather.id === activeMemberId} />}
-        {gFather && gMother && (
-          <div className="w-4 h-0.5 bg-slate-350 shrink-0 border-t border-dashed border-slate-400" />
+      <div className="flex items-center gap-2 bg-slate-50/90 p-2 rounded-2xl border border-slate-200/80 shadow-xs z-10 shrink-0">
+        {gFather && (
+          <MemberNodeCard
+            member={gFather}
+            isCurrentFocus={gFather.id === activeMemberId}
+          />
         )}
-        {gMother && <MemberNodeCard member={gMother} isCurrentFocus={gMother.id === activeMemberId} />}
+        {gFather && gMother && (
+          <div className="w-4 h-0.5 bg-gradient-to-r from-indigo-300 to-rose-300 shrink-0 rounded-full" />
+        )}
+        {gMother && (
+          <MemberNodeCard
+            member={gMother}
+            isCurrentFocus={gMother.id === activeMemberId}
+          />
+        )}
       </div>
     );
   };
@@ -248,8 +305,6 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
   /**
    * Helper: renderDescendantsTier
    * Renders the descendants (children and optionally grandchildren) of a given family member.
-   * - isCollateral = true: renders children as a de-emphasized branch with no grandchildren expansion.
-   * - isCollateral = false: renders children with full styling, and expands grandchildren.
    */
   const renderDescendantsTier = (parentMember: FamilyMember, isCollateral: boolean) => {
     const children = familyData
@@ -261,24 +316,33 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
         return a.name.localeCompare(b.name);
       });
 
+    // If no children exist, render NOTHING below (no empty lines)
     if (children.length === 0) return null;
 
-    const connectorBorderClass = isCollateral ? "border-dashed border-slate-300/70" : "border-slate-300";
-    const connectorBgClass = isCollateral ? "bg-slate-300/50" : "bg-slate-300";
+    const isSingle = children.length === 1;
 
     return (
-      <div className="flex flex-col items-center w-full mt-0.5 z-0">
-        {/* Vertical connector line */}
-        <div className={`w-0.5 h-4 ${connectorBgClass} z-0`} />
+      <div className="flex flex-col items-center w-full mt-1 z-0">
+        {/* Branching stem from parent with dot */}
+        <div className="flex flex-col items-center">
+          <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white shadow-xs" />
+          <div className="w-0.5 h-6 bg-gradient-to-b from-indigo-300 to-indigo-200" />
+        </div>
 
-        <div className="flex flex-row justify-center items-start gap-8 relative pt-4">
+        {/* Children Row with Continuous Seamless Crossbar */}
+        <div className="flex flex-row justify-center items-start">
           {children.map((child, index) => {
             const spouse = child.spouseId ? memberMap.get(child.spouseId) || null : null;
+            const isFirst = index === 0;
+            const isLast = index === children.length - 1;
 
             // Only retrieve grandchildren for the focus member's direct lineage
             const grandchildren = !isCollateral
               ? familyData
-                  .filter((grandchild) => grandchild.fatherId === child.id || grandchild.motherId === child.id)
+                  .filter(
+                    (grandchild) =>
+                      grandchild.fatherId === child.id || grandchild.motherId === child.id
+                  )
                   .sort((a, b) => {
                     const yearA = getBirthYear(a);
                     const yearB = getBirthYear(b);
@@ -288,50 +352,98 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
               : [];
 
             return (
-              <div key={child.id} className="relative flex flex-col items-center">
-                {/* Horizontal connection line for sibling nodes */}
-                {children.length > 1 && (
-                  <div className="absolute top-0 left-0 right-0 flex z-0">
-                    <div className={`w-1/2 h-0.5 border-t ${connectorBorderClass} ${index === 0 ? "invisible" : ""}`} />
-                    <div className={`w-1/2 h-0.5 border-t ${connectorBorderClass} ${index === children.length - 1 ? "invisible" : ""}`} />
+              <div key={child.id} className="relative flex flex-col items-center px-3 sm:px-5">
+                {/* Seamless Edge-to-Edge Crossbar */}
+                {!isSingle && (
+                  <div className="absolute top-0 left-0 right-0 h-0.5 flex z-0">
+                    <div
+                      className={`flex-1 border-t-2 border-indigo-200 ${
+                        isFirst ? "invisible" : ""
+                      }`}
+                    />
+                    <div
+                      className={`flex-1 border-t-2 border-indigo-200 ${
+                        isLast ? "invisible" : ""
+                      }`}
+                    />
                   </div>
                 )}
-                {/* Vertical connector line */}
-                <div className={`w-0.5 h-4 ${connectorBgClass} pointer-events-none mb-1 z-0`} />
+
+                {/* Vertical Drop Stem with junction dot into card */}
+                <div className="flex flex-col items-center pointer-events-none mb-1 z-0">
+                  <div className="w-0.5 h-4 bg-indigo-200" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 -mt-0.5 ring-2 ring-white shadow-xs" />
+                </div>
 
                 {/* Sibling Couple / Single Card */}
-                <div className={`flex items-center gap-1.5 p-2 rounded-2xl border shadow-sm z-10 shrink-0 ${
-                  isCollateral
-                    ? "border-slate-200/30 bg-slate-50/30"
-                    : "border-slate-200/40 bg-slate-50/50"
-                }`}>
-                  <MemberNodeCard member={child} isCurrentFocus={child.id === activeMemberId} isDeemphasized={isCollateral} />
+                <div
+                  className={`flex items-center gap-2 p-2 rounded-2xl border shadow-xs z-10 shrink-0 ${
+                    isCollateral
+                      ? "border-slate-200/40 bg-slate-50/40"
+                      : "border-slate-200/70 bg-white"
+                  }`}
+                >
+                  <MemberNodeCard
+                    member={child}
+                    isCurrentFocus={child.id === activeMemberId}
+                    isDeemphasized={isCollateral}
+                  />
                   {spouse && (
                     <>
-                      <div className={`w-4 h-0.5 shrink-0 border-t ${isCollateral ? "border-dashed border-slate-300/50" : "border-dashed border-slate-400"}`} />
-                      <MemberNodeCard member={spouse} isCurrentFocus={spouse.id === activeMemberId} isDeemphasized={isCollateral} />
+                      <div className="w-4 h-0.5 bg-gradient-to-r from-indigo-300 to-rose-300 shrink-0 rounded-full" />
+                      <MemberNodeCard
+                        member={spouse}
+                        isCurrentFocus={spouse.id === activeMemberId}
+                        isDeemphasized={isCollateral}
+                      />
                     </>
                   )}
                 </div>
 
                 {/* Grandchildren Tier (Direct active branch only) */}
                 {!isCollateral && grandchildren.length > 0 && (
-                  <div className="flex flex-col items-center w-full mt-0.5 z-0">
-                    <div className="w-0.5 h-4 bg-slate-300 z-0" />
+                  <div className="flex flex-col items-center w-full mt-1 z-0">
+                    <div className="flex flex-col items-center">
+                      <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white shadow-xs" />
+                      <div className="w-0.5 h-6 bg-gradient-to-b from-indigo-300 to-indigo-200" />
+                    </div>
 
-                    <div className="flex flex-row justify-center items-start gap-8 relative pt-4">
-                      {grandchildren.map((grandchild, grandchildIndex) => (
-                        <div key={grandchild.id} className="relative flex flex-col items-center">
-                          {grandchildren.length > 1 && (
-                            <div className="absolute top-0 left-0 right-0 flex z-0">
-                              <div className={`w-1/2 h-0.5 border-t border-slate-300 ${grandchildIndex === 0 ? "invisible" : ""}`} />
-                              <div className={`w-1/2 h-0.5 border-t border-slate-300 ${grandchildIndex === grandchildren.length - 1 ? "invisible" : ""}`} />
+                    <div className="flex flex-row justify-center items-start">
+                      {grandchildren.map((grandchild, grandchildIndex) => {
+                        const isGFirst = grandchildIndex === 0;
+                        const isGLast = grandchildIndex === grandchildren.length - 1;
+                        const isGSingle = grandchildren.length === 1;
+
+                        return (
+                          <div
+                            key={grandchild.id}
+                            className="relative flex flex-col items-center px-3 sm:px-5"
+                          >
+                            {!isGSingle && (
+                              <div className="absolute top-0 left-0 right-0 h-0.5 flex z-0">
+                                <div
+                                  className={`flex-1 border-t-2 border-indigo-200 ${
+                                    isGFirst ? "invisible" : ""
+                                  }`}
+                                />
+                                <div
+                                  className={`flex-1 border-t-2 border-indigo-200 ${
+                                    isGLast ? "invisible" : ""
+                                  }`}
+                                />
+                              </div>
+                            )}
+                            <div className="flex flex-col items-center pointer-events-none mb-1 z-0">
+                              <div className="w-0.5 h-4 bg-indigo-200" />
+                              <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 -mt-0.5 ring-2 ring-white shadow-xs" />
                             </div>
-                          )}
-                          <div className="w-0.5 h-4 bg-slate-300 pointer-events-none mb-1 z-0" />
-                          <MemberNodeCard member={grandchild} isCurrentFocus={grandchild.id === activeMemberId} />
-                        </div>
-                      ))}
+                            <MemberNodeCard
+                              member={grandchild}
+                              isCurrentFocus={grandchild.id === activeMemberId}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -345,107 +457,240 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
 
   return (
     <Card
-      className="p-6 border border-slate-200/50 bg-white/75 backdrop-blur-md shadow-xl rounded-3xl w-full mx-auto min-h-[500px] overflow-x-auto"
+      className="p-6 border border-slate-200/50 bg-white/75 backdrop-blur-md shadow-xl rounded-3xl w-full mx-auto min-h-[500px] overflow-hidden"
       placeholder={undefined}
     >
       <div className="space-y-6 select-none">
-        <div className="border-b border-slate-100 pb-3">
-          <Typography variant="h6" className="text-slate-800 font-bold font-heading" placeholder={undefined}>
-            Interactive Family Tree Explorer
-          </Typography>
-          <Typography className="text-[11px] text-slate-400 font-semibold mt-0.5" placeholder={undefined}>
-            An interactive explorer showing ancestors, siblings, spouses, children, and grandchildren centered around the active family member.
-          </Typography>
+        {/* Top Header & Zoom Controls */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-3">
+          <div>
+            <Typography
+              variant="h6"
+              className="text-slate-900 font-bold font-heading"
+              placeholder={undefined}
+            >
+              Interactive Family Tree Explorer
+            </Typography>
+            <Typography
+              className="text-[11px] text-slate-400 font-semibold mt-0.5"
+              placeholder={undefined}
+            >
+              Ancestors, siblings, spouses, and descendants centered around the active family member.
+            </Typography>
+          </div>
+
+          {/* Floating Zoom Controls */}
+          {activeMember && (
+            <div className="no-export flex items-center gap-1 bg-slate-50/90 border border-slate-200/90 p-1 rounded-2xl shadow-xs">
+              <button
+                type="button"
+                onClick={() =>
+                  setZoom((z) => Math.max(0.5, Number((z - 0.15).toFixed(2))))
+                }
+                className="p-1.5 rounded-xl hover:bg-white text-slate-600 hover:text-indigo-600 transition-colors"
+                title="Zoom Out"
+              >
+                <MagnifyingGlassMinusIcon className="h-4 w-4" />
+              </button>
+
+              <span className="text-[11px] font-extrabold text-slate-700 px-2 min-w-[48px] text-center font-mono">
+                {Math.round(zoom * 100)}%
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setZoom((z) => Math.min(1.8, Number((z + 0.15).toFixed(2))))
+                }
+                className="p-1.5 rounded-xl hover:bg-white text-slate-600 hover:text-indigo-600 transition-colors"
+                title="Zoom In"
+              >
+                <MagnifyingGlassPlusIcon className="h-4 w-4" />
+              </button>
+
+              {zoom !== 1 && (
+                <button
+                  type="button"
+                  onClick={() => setZoom(1)}
+                  className="p-1.5 rounded-xl hover:bg-white text-slate-400 hover:text-indigo-600 transition-colors"
+                  title="Reset Zoom"
+                >
+                  <ArrowPathIcon className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {activeMember ? (
-          <div className="py-8 w-full overflow-x-auto">
-            <div id="full-tree-canvas" className="inline-flex flex-col items-center min-w-full px-8 py-6 bg-slate-50/40 rounded-3xl">
-              
-              {/* Generation -2: Grandparents */}
+          <div className="py-6 w-full overflow-x-auto overflow-y-auto">
+            <div
+              id="full-tree-canvas"
+              style={{
+                transform: `scale(${zoom})`,
+                transformOrigin: "top center",
+                transition: "transform 0.2s ease-out",
+              }}
+              className="inline-flex flex-col items-center min-w-full px-8 py-6 bg-slate-50/40 rounded-3xl"
+            >
+              {/* Generation -2: Grandparents Tier */}
               {hasGrandparents && (
-                <div className="flex flex-row justify-center gap-24 relative pb-4 z-0">
-                  {/* Paternal Grandparents */}
-                  <div className="flex flex-col items-center">
-                    {renderGrandparentsCouple(paternalGrandfather, paternalGrandmother)}
-                    {(paternalGrandfather || paternalGrandmother) && father && <div className="w-0.5 h-4 bg-slate-300 z-0" />}
-                  </div>
-
-                  {/* Maternal Grandparents */}
-                  <div className="flex flex-col items-center">
-                    {renderGrandparentsCouple(maternalGrandfather, maternalGrandmother)}
-                    {(maternalGrandfather || maternalGrandmother) && mother && <div className="w-0.5 h-4 bg-slate-300 z-0" />}
-                  </div>
+                <div className="flex flex-row justify-center items-center pb-0 z-0">
+                  {paternalGrandfather || paternalGrandmother ? (
+                    <div className="flex flex-col items-center">
+                      {renderGrandparentsCouple(
+                        paternalGrandfather,
+                        paternalGrandmother
+                      )}
+                      {/* Vertical stem connecting Grandparents down to Generation -1 crossbar */}
+                      <div className="flex flex-col items-center">
+                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white shadow-xs" />
+                        <div className="w-0.5 h-6 bg-gradient-to-b from-indigo-300 to-indigo-200" />
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               )}
 
               {/* Generation -1 & 0: Parent with Paternal Uncles/Aunts & Children */}
               {hasParents && father ? (
-                <div className="flex flex-row justify-center items-start gap-12 relative pt-4">
+                <div className="flex flex-row justify-center items-start">
                   {fatherSiblings.map((sib, index) => {
-                    const spouse = sib.id === father.id ? mother : (sib.spouseId ? memberMap.get(sib.spouseId) || null : null);
+                    const spouse =
+                      sib.id === father.id
+                        ? mother
+                        : sib.spouseId
+                        ? memberMap.get(sib.spouseId) || null
+                        : null;
                     const isFatherNode = sib.id === father.id;
+                    const isFirst = index === 0;
+                    const isLast = index === fatherSiblings.length - 1;
+                    const isSingle = fatherSiblings.length === 1;
+
+                    const showTopConnector =
+                      !isSingle || Boolean(paternalGrandfather || paternalGrandmother);
 
                     return (
-                      <div key={sib.id} className="relative flex flex-col items-center">
-                        {/* Horizontal connection line for father's siblings */}
-                        {fatherSiblings.length > 1 && (
-                          <div className="absolute top-0 left-0 right-0 flex z-0">
-                            <div className={`w-1/2 h-0.5 border-t border-slate-300 ${index === 0 ? "invisible" : ""}`} />
-                            <div className={`w-1/2 h-0.5 border-t border-slate-300 ${index === fatherSiblings.length - 1 ? "invisible" : ""}`} />
+                      <div
+                        key={sib.id}
+                        className="relative flex flex-col items-center px-4 sm:px-6"
+                      >
+                        {/* Seamless Horizontal Crossbar for Father & Uncles/Aunts */}
+                        {!isSingle && (
+                          <div className="absolute top-0 left-0 right-0 h-0.5 flex z-0">
+                            <div
+                              className={`flex-1 border-t-2 border-indigo-200 ${
+                                isFirst ? "invisible" : ""
+                              }`}
+                            />
+                            <div
+                              className={`flex-1 border-t-2 border-indigo-200 ${
+                                isLast ? "invisible" : ""
+                              }`}
+                            />
                           </div>
                         )}
-                        <div className="w-0.5 h-4 bg-slate-300 pointer-events-none mb-1 z-0" />
+
+                        {/* Top connector for each brother/uncle card */}
+                        {showTopConnector && (
+                          <div className="flex flex-col items-center pointer-events-none mb-1 z-0">
+                            <div className="w-0.5 h-4 bg-indigo-200" />
+                            <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 -mt-0.5 ring-2 ring-white shadow-xs" />
+                          </div>
+                        )}
 
                         {/* Card Unit */}
-                        <div className={`flex items-center gap-1.5 p-2 rounded-2xl border shadow-sm z-10 shrink-0 ${
-                          isFatherNode
-                            ? "bg-indigo-50/30 border-indigo-200 ring-2 ring-indigo-500/10 shadow"
-                            : "bg-slate-50/50 border-slate-200/40"
-                        }`}>
-                          <MemberNodeCard member={sib} isCurrentFocus={sib.id === activeMemberId} isDeemphasized={!isFatherNode} />
+                        <div
+                          className={`flex items-center gap-2 p-2 rounded-2xl border shadow-xs z-10 shrink-0 ${
+                            isFatherNode
+                              ? "bg-indigo-50/40 border-indigo-200 ring-2 ring-indigo-500/15 shadow-sm"
+                              : "bg-slate-50/50 border-slate-200/50"
+                          }`}
+                        >
+                          <MemberNodeCard
+                            member={sib}
+                            isCurrentFocus={sib.id === activeMemberId}
+                            isDeemphasized={!isFatherNode}
+                          />
                           {spouse && (
                             <>
-                              <div className="w-4 h-0.5 bg-slate-350 shrink-0 border-t border-dashed border-slate-400" />
-                              <MemberNodeCard member={spouse} isCurrentFocus={spouse.id === activeMemberId} isDeemphasized={!isFatherNode} />
+                              <div className="w-4 h-0.5 bg-gradient-to-r from-indigo-300 to-rose-300 shrink-0 rounded-full" />
+                              <MemberNodeCard
+                                member={spouse}
+                                isCurrentFocus={spouse.id === activeMemberId}
+                                isDeemphasized={!isFatherNode}
+                              />
                             </>
                           )}
                         </div>
 
-                        {/* Descendants Tier:
-                            - For Father: renders your sibling row (you + siblings), which then expands to Level +1 and +2.
-                            - For Father's siblings: renders cousins de-emphasized.
-                        */}
+                        {/* Generation 0 (You + Siblings) or Cousins */}
                         {isFatherNode ? (
-                          <div className="flex flex-col items-center w-full mt-0.5 z-0">
-                            <div className="w-0.5 h-4 bg-slate-300 z-0" />
-                            <div className="flex flex-row justify-center items-start gap-12 relative pt-4">
+                          <div className="flex flex-col items-center w-full mt-1 z-0">
+                            {/* Stem dropping from Father & Mother down to Generation 0 */}
+                            <div className="flex flex-col items-center">
+                              <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white shadow-xs" />
+                              <div className="w-0.5 h-6 bg-gradient-to-b from-indigo-300 to-indigo-200" />
+                            </div>
+
+                            <div className="flex flex-row justify-center items-start">
                               {siblings.map((sibling, siblingIndex) => {
-                                const siblingSpouse = sibling.spouseId ? memberMap.get(sibling.spouseId) || null : null;
+                                const siblingSpouse = sibling.spouseId
+                                  ? memberMap.get(sibling.spouseId) || null
+                                  : null;
                                 const isFocus = sibling.id === activeMemberId;
+                                const isSibFirst = siblingIndex === 0;
+                                const isSibLast = siblingIndex === siblings.length - 1;
+                                const isSibSingle = siblings.length === 1;
 
                                 return (
-                                  <div key={sibling.id} className="relative flex flex-col items-center">
-                                    {siblings.length > 1 && (
-                                      <div className="absolute top-0 left-0 right-0 flex z-0">
-                                        <div className={`w-1/2 h-0.5 border-t border-slate-300 ${siblingIndex === 0 ? "invisible" : ""}`} />
-                                        <div className={`w-1/2 h-0.5 border-t border-slate-300 ${siblingIndex === siblings.length - 1 ? "invisible" : ""}`} />
+                                  <div
+                                    key={sibling.id}
+                                    className="relative flex flex-col items-center px-4 sm:px-6"
+                                  >
+                                    {/* Seamless Sibling Crossbar */}
+                                    {!isSibSingle && (
+                                      <div className="absolute top-0 left-0 right-0 h-0.5 flex z-0">
+                                        <div
+                                          className={`flex-1 border-t-2 border-indigo-200 ${
+                                            isSibFirst ? "invisible" : ""
+                                          }`}
+                                        />
+                                        <div
+                                          className={`flex-1 border-t-2 border-indigo-200 ${
+                                            isSibLast ? "invisible" : ""
+                                          }`}
+                                        />
                                       </div>
                                     )}
-                                    <div className="w-0.5 h-4 bg-slate-300 pointer-events-none mb-1 z-0" />
-                                    <div className={`flex items-center gap-1.5 p-2 rounded-2xl border shadow-sm z-10 shrink-0 ${
-                                      isFocus
-                                        ? "bg-indigo-50/30 border-indigo-200 ring-2 ring-indigo-500/10 shadow"
-                                        : "bg-slate-50/50 border-slate-200/40"
-                                    }`}>
-                                      <MemberNodeCard member={sibling} isCurrentFocus={isFocus} />
+
+                                    <div className="flex flex-col items-center pointer-events-none mb-1 z-0">
+                                      <div className="w-0.5 h-4 bg-indigo-200" />
+                                      <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 -mt-0.5 ring-2 ring-white shadow-xs" />
+                                    </div>
+
+                                    <div
+                                      className={`flex items-center gap-2 p-2 rounded-2xl border shadow-xs z-10 shrink-0 ${
+                                        isFocus
+                                          ? "bg-indigo-50/40 border-indigo-200 ring-2 ring-indigo-500/15 shadow-sm"
+                                          : "bg-white border-slate-200/60"
+                                      }`}
+                                    >
+                                      <MemberNodeCard
+                                        member={sibling}
+                                        isCurrentFocus={isFocus}
+                                      />
                                       {siblingSpouse && (
                                         <>
-                                          <div className="w-4 h-0.5 bg-slate-350 shrink-0 border-t border-dashed border-slate-400" />
-                                          <MemberNodeCard member={siblingSpouse} isCurrentFocus={siblingSpouse.id === activeMemberId} />
+                                          <div className="w-4 h-0.5 bg-gradient-to-r from-indigo-300 to-rose-300 shrink-0 rounded-full" />
+                                          <MemberNodeCard
+                                            member={siblingSpouse}
+                                            isCurrentFocus={siblingSpouse.id === activeMemberId}
+                                          />
                                         </>
                                       )}
                                     </div>
+
                                     {renderDescendantsTier(sibling, !isFocus)}
                                   </div>
                                 );
@@ -461,31 +706,61 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
                 </div>
               ) : (
                 /* Fallback Level 0 Sibling Row when parents do not exist */
-                <div className="flex flex-row justify-center items-start gap-12 relative pt-4">
+                <div className="flex flex-row justify-center items-start">
                   {siblings.map((sibling, index) => {
-                    const spouse = sibling.spouseId ? memberMap.get(sibling.spouseId) || null : null;
+                    const spouse = sibling.spouseId
+                      ? memberMap.get(sibling.spouseId) || null
+                      : null;
                     const isFocus = sibling.id === activeMemberId;
+                    const isFirst = index === 0;
+                    const isLast = index === siblings.length - 1;
+                    const isSingle = siblings.length === 1;
 
                     return (
-                      <div key={sibling.id} className="relative flex flex-col items-center">
-                        {siblings.length > 1 && (
-                          <div className="absolute top-0 left-0 right-0 flex z-0">
-                            <div className={`w-1/2 h-0.5 border-t border-slate-300 ${index === 0 ? "invisible" : ""}`} />
-                            <div className={`w-1/2 h-0.5 border-t border-slate-300 ${index === siblings.length - 1 ? "invisible" : ""}`} />
-                          </div>
+                      <div
+                        key={sibling.id}
+                        className="relative flex flex-col items-center px-4 sm:px-6"
+                      >
+                        {/* Only render horizontal line if multiple siblings exist */}
+                        {!isSingle && (
+                          <>
+                            <div className="absolute top-0 left-0 right-0 h-0.5 flex z-0">
+                              <div
+                                className={`flex-1 border-t-2 border-indigo-200 ${
+                                  isFirst ? "invisible" : ""
+                                }`}
+                              />
+                              <div
+                                className={`flex-1 border-t-2 border-indigo-200 ${
+                                  isLast ? "invisible" : ""
+                                }`}
+                              />
+                            </div>
+                            <div className="flex flex-col items-center pointer-events-none mb-1 z-0">
+                              <div className="w-0.5 h-4 bg-indigo-200" />
+                              <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 -mt-0.5 ring-2 ring-white shadow-xs" />
+                            </div>
+                          </>
                         )}
-                        <div className="w-0.5 h-4 bg-slate-300 pointer-events-none mb-1 z-0" />
 
-                        <div className={`flex items-center gap-1.5 p-2 rounded-2xl border shadow-sm z-10 shrink-0 ${
-                          isFocus
-                            ? "bg-indigo-50/30 border-indigo-200 ring-2 ring-indigo-500/10 shadow"
-                            : "bg-slate-50/50 border-slate-200/40"
-                        }`}>
-                          <MemberNodeCard member={sibling} isCurrentFocus={isFocus} />
+                        <div
+                          className={`flex items-center gap-2 p-2 rounded-2xl border shadow-xs z-10 shrink-0 ${
+                            isFocus
+                              ? "bg-indigo-50/40 border-indigo-200 ring-2 ring-indigo-500/15 shadow-sm"
+                              : "bg-white border-slate-200/60"
+                          }`}
+                        >
+                          <MemberNodeCard
+                            member={sibling}
+                            isCurrentFocus={isFocus}
+                          />
                           {spouse && (
                             <>
-                              <div className="w-4 h-0.5 bg-slate-350 shrink-0 border-t border-dashed border-slate-400" />
-                              <MemberNodeCard member={spouse} isCurrentFocus={spouse.id === activeMemberId} />
+                              <div className="w-4 h-0.5 bg-gradient-to-r from-indigo-300 to-rose-300 shrink-0 rounded-full" />
+                              <MemberNodeCard
+                                member={spouse}
+                                isCurrentFocus={spouse.id === activeMemberId}
+                              />
                             </>
                           )}
                         </div>
@@ -496,12 +771,14 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
                   })}
                 </div>
               )}
-
             </div>
           </div>
         ) : (
-          <Typography className="text-sm text-slate-400 font-medium text-center py-10" placeholder={undefined}>
-            No family members registered. Switch to Hourglass explorer to add the first member.
+          <Typography
+            className="text-sm text-slate-400 font-medium text-center py-10"
+            placeholder={undefined}
+          >
+            No family members registered. Switch to Focused View to add the first member.
           </Typography>
         )}
       </div>

@@ -91,6 +91,67 @@ export function extractYear(dateStr?: string): string | null {
   return match ? match[0] : null;
 }
 
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/**
+ * Formats a raw date string into natural Indian / standard display format (e.g. "27 December 1997").
+ */
+export function formatDisplayDate(dateStr?: string): string {
+  if (!dateStr || typeof dateStr !== "string") return "";
+  const trimmed = dateStr.trim();
+
+  // Pattern 1: YYYY-MM-DD (ISO format)
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (isoMatch) {
+    const year = isoMatch[1];
+    const monthIndex = parseInt(isoMatch[2], 10) - 1;
+    const day = parseInt(isoMatch[3], 10);
+    if (monthIndex >= 0 && monthIndex < 12) {
+      return `${day} ${MONTH_NAMES[monthIndex]} ${year}`;
+    }
+  }
+
+  // Pattern 2: DD/MM/YYYY or DD-MM-YYYY
+  const dmyMatch = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+  if (dmyMatch) {
+    const day = parseInt(dmyMatch[1], 10);
+    const monthIndex = parseInt(dmyMatch[2], 10) - 1;
+    const year = dmyMatch[3];
+    if (monthIndex >= 0 && monthIndex < 12) {
+      return `${day} ${MONTH_NAMES[monthIndex]} ${year}`;
+    }
+  }
+
+  // Pattern 3: Year only (e.g., "1997")
+  if (/^\d{4}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Fallback: parse standard date if valid
+  const parsed = new Date(trimmed);
+  if (!isNaN(parsed.getTime())) {
+    const day = parsed.getDate();
+    const month = MONTH_NAMES[parsed.getMonth()];
+    const year = parsed.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
+  return trimmed;
+}
+
 /**
  * Formats a lifespan string like "(1940 — 2012)" or "(1995 — Present)" or ""
  */
@@ -102,4 +163,79 @@ export function formatLifespan(birthDate?: string, deathDate?: string): string {
   if (birthYear && deathYear) return `(${birthYear} — ${deathYear})`;
   if (birthYear && !deathYear) return `(${birthYear} — Present)`;
   return `(? — ${deathYear})`;
+}
+
+export interface AgeInfo {
+  years: number;
+  months: number;
+  formatted: string;
+  isDeceased: boolean;
+}
+
+/**
+ * Calculates current age or age at passing with exact years and months.
+ */
+export function calculateAge(birthDateStr?: string, deathDateStr?: string): AgeInfo | null {
+  if (!birthDateStr) return null;
+  const bYear = extractYear(birthDateStr);
+  if (!bYear) return null;
+  const birthYear = parseInt(bYear, 10);
+  if (isNaN(birthYear)) return null;
+
+  // Check if parseable full calendar date
+  const hasFullDate = birthDateStr.includes("-") || birthDateStr.includes("/");
+  const birthDate = new Date(birthDateStr);
+  const isValidBirthDate = !isNaN(birthDate.getTime()) && hasFullDate;
+
+  const endDate = deathDateStr ? new Date(deathDateStr) : new Date();
+  const isValidEndDate = !isNaN(endDate.getTime());
+  const isDeceased = Boolean(deathDateStr);
+
+  let years = 0;
+  let months = 0;
+
+  if (isValidBirthDate && isValidEndDate) {
+    years = endDate.getFullYear() - birthDate.getFullYear();
+    months = endDate.getMonth() - birthDate.getMonth();
+    const days = endDate.getDate() - birthDate.getDate();
+
+    if (days < 0) {
+      months -= 1;
+    }
+    if (months < 0) {
+      years -= 1;
+      months += 12;
+    }
+    years = Math.max(0, years);
+    months = Math.max(0, months);
+  } else {
+    // Year-only fallback
+    const endYear =
+      deathDateStr && extractYear(deathDateStr)
+        ? parseInt(extractYear(deathDateStr)!, 10)
+        : new Date().getFullYear();
+    years = Math.max(0, endYear - birthYear);
+    months = 0;
+  }
+
+  // Format string
+  let formatted = "";
+  if (years > 0 && months > 0) {
+    formatted = `${years} yrs, ${months} ${months === 1 ? "mo" : "mos"}`;
+  } else if (years > 0) {
+    formatted = `${years} years old`;
+  } else {
+    formatted = `${months} ${months === 1 ? "month" : "months"} old`;
+  }
+
+  if (isDeceased) {
+    formatted = `${formatted} at passing`;
+  }
+
+  return {
+    years,
+    months,
+    formatted,
+    isDeceased,
+  };
 }

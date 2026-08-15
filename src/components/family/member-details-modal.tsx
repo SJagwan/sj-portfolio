@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { Typography, Dialog, DialogBody, Button } from "@material-tailwind/react";
 import { CalendarIcon, MapPinIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { FamilyMember } from "@/types";
+import { calculateAge, formatDisplayDate } from "./utils";
 
 interface MemberDetailsModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export function MemberDetailsModal({
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!member) return null;
+
+  const ageInfo = calculateAge(member.birthDate, member.deathDate);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -87,30 +90,57 @@ export function MemberDetailsModal({
             </Typography>
           </div>
 
-          {/* Lifespan & Location Details */}
+          {/* Lifespan, Age & Location Details */}
           <div className="grid grid-cols-1 gap-3 text-sm">
             {member.birthDate && (
-              <div className="flex items-center gap-3 bg-slate-50/70 p-3 rounded-xl">
-                <CalendarIcon className="h-5 w-5 text-indigo-500 shrink-0" />
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold">
-                    Lifespan / Birthdate
+              <div className="flex items-start gap-3 bg-slate-50/70 p-3.5 rounded-2xl border border-slate-100/80">
+                <div className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CalendarIcon className="h-5 w-5 text-indigo-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                    Birth Date
                   </p>
-                  <p className="font-semibold text-slate-800">
-                    {member.birthDate}
-                    {member.deathDate ? ` — ${member.deathDate} (Deceased)` : ""}
+                  <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                    <p className="font-bold text-slate-800 text-sm">
+                      {formatDisplayDate(member.birthDate)}
+                    </p>
+                    {ageInfo && (
+                      <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100/70 border border-indigo-200/60 px-2.5 py-0.5 rounded-full">
+                        {ageInfo.formatted}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {member.deathDate && (
+              <div className="flex items-start gap-3 bg-slate-50/70 p-3.5 rounded-2xl border border-slate-100/80">
+                <div className="h-9 w-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CalendarIcon className="h-5 w-5 text-slate-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                    Passed Away
+                  </p>
+                  <p className="font-bold text-slate-800 text-sm mt-0.5">
+                    {formatDisplayDate(member.deathDate)}
                   </p>
                 </div>
               </div>
             )}
+
             {member.birthPlace && (
-              <div className="flex items-center gap-3 bg-slate-50/70 p-3 rounded-xl">
-                <MapPinIcon className="h-5 w-5 text-indigo-500 shrink-0" />
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold">
+              <div className="flex items-start gap-3 bg-slate-50/70 p-3.5 rounded-2xl border border-slate-100/80">
+                <div className="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPinIcon className="h-5 w-5 text-emerald-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
                     Birthplace
                   </p>
-                  <p className="font-semibold text-slate-800">
+                  <p className="font-bold text-slate-800 text-sm mt-0.5">
                     {member.birthPlace}
                   </p>
                 </div>
@@ -118,17 +148,15 @@ export function MemberDetailsModal({
             )}
           </div>
 
-          {/* Biography Details */}
+          {/* Biography Content with Vertical Accent Line */}
           {member.bio && (
-            <div className="space-y-2">
+            <div
+              className={`border-l-4 ${
+                isFemale ? "border-rose-400 bg-rose-50/20" : "border-indigo-400 bg-indigo-50/20"
+              } pl-4 pr-3 py-3 rounded-r-2xl text-left`}
+            >
               <Typography
-                className="text-xs font-extrabold text-slate-400 uppercase tracking-widest"
-                placeholder={undefined}
-              >
-                Biography & History
-              </Typography>
-              <Typography
-                className="text-sm text-slate-600 leading-relaxed font-normal bg-slate-50/30 p-4 rounded-2xl border border-slate-100"
+                className="text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-wrap"
                 placeholder={undefined}
               >
                 {member.bio}

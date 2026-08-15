@@ -2,10 +2,9 @@
 "use client";
 
 import React from "react";
-import { Typography, Card, Button } from "@material-tailwind/react";
+import { Typography, Button } from "@material-tailwind/react";
 import { UserIcon, AcademicCapIcon, InformationCircleIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { FamilyMember } from "@/types";
-import { formatLifespan } from "./utils";
 
 interface MemberCardProps {
   member?: FamilyMember;
@@ -79,8 +78,6 @@ export function MemberCard({
     );
   }
 
-  const lifespan = formatLifespan(member.birthDate, member.deathDate);
-
   // 2. Active Focus Member Card (Primary node with glowing border and full details)
   if (isActive) {
     return (
@@ -121,20 +118,11 @@ export function MemberCard({
 
         <Typography
           variant="h4"
-          className="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug mb-1 font-heading"
+          className="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug mb-4 font-heading"
           placeholder={undefined}
         >
           {member.name}
         </Typography>
-
-        {lifespan && (
-          <Typography
-            className="text-xs text-slate-500 font-semibold mb-4 font-sans"
-            placeholder={undefined}
-          >
-            {lifespan}
-          </Typography>
-        )}
 
         {onViewDetails && (
           <Button
@@ -224,12 +212,6 @@ export function MemberCard({
         <span className={`text-[10px] font-extrabold tracking-wide uppercase px-2.5 py-0.5 rounded-full ${getBadgeStyling()}`}>
           {label}
         </span>
-
-        {lifespan && (
-          <span className="text-[10px] font-semibold text-slate-500 mt-1">
-            {lifespan}
-          </span>
-        )}
       </div>
     </div>
   );
