@@ -13,6 +13,7 @@ interface MemberDetailsModalProps {
   member: FamilyMember | null;
   onEdit: (member: FamilyMember) => void;
   onDelete?: (memberId: string) => Promise<void> | void;
+  canEdit?: boolean;
 }
 
 export function MemberDetailsModal({
@@ -21,6 +22,7 @@ export function MemberDetailsModal({
   member,
   onEdit,
   onDelete,
+  canEdit = true,
 }: MemberDetailsModalProps) {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -205,7 +207,7 @@ export function MemberDetailsModal({
           ) : (
             /* Actions */
             <div className="flex flex-wrap justify-between items-center gap-3 pt-2 border-t border-slate-100/80">
-              {onDelete ? (
+              {canEdit && onDelete ? (
                 <button
                   type="button"
                   onClick={() => setIsConfirmingDelete(true)}
@@ -215,19 +217,23 @@ export function MemberDetailsModal({
                   <TrashIcon className="h-4 w-4" />
                   Delete
                 </button>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
 
               <div className="flex items-center gap-3">
-                <Button
-                  size="md"
-                  variant="outlined"
-                  onClick={() => onEdit(member)}
-                  className="flex items-center gap-2 border-slate-200 hover:border-slate-850 text-slate-650 hover:text-slate-900 rounded-xl capitalize font-bold text-sm tracking-wide px-5 py-2.5 transition-all duration-150 shadow-none hover:shadow-none"
-                  placeholder={undefined}
-                >
-                  <PencilIcon className="h-4 w-4 text-indigo-500" />
-                  Edit Profile
-                </Button>
+                {canEdit && (
+                  <Button
+                    size="md"
+                    variant="outlined"
+                    onClick={() => onEdit(member)}
+                    className="flex items-center gap-2 border-slate-200 hover:border-slate-850 text-slate-650 hover:text-slate-900 rounded-xl capitalize font-bold text-sm tracking-wide px-5 py-2.5 transition-all duration-150 shadow-none hover:shadow-none"
+                    placeholder={undefined}
+                  >
+                    <PencilIcon className="h-4 w-4 text-indigo-500" />
+                    Edit Profile
+                  </Button>
+                )}
                 <Button
                   size="md"
                   onClick={onClose}

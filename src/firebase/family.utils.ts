@@ -5,9 +5,17 @@ import { FamilyMember } from "@/types";
 const SESSION_KEY = "family_tree_session";
 const SESSION_TIMEOUT_MS = 1800000; // 30 minutes
 
+export type UserRole = "admin" | "viewer";
+
 interface ActiveSession {
   hash: string;
+  role: UserRole;
   expiry: number;
+}
+
+export interface AuthResult {
+  isValid: boolean;
+  role: UserRole;
 }
 
 /**
@@ -22,19 +30,29 @@ export async function hashPasscode(passcode: string): Promise<string> {
 }
 
 /**
- * Verifies if the entered passcode matches a document hash in Firestore.
+ * Verifies if the entered passcode matches an admin or normal viewer document in Firestore.
  */
-export async function checkPasscode(passcode: string): Promise<boolean> {
+export async function checkPasscode(passcode: string): Promise<AuthResult> {
   try {
-    const hash = await hashPasscode(passcode);
+    const trimmed = passcode.trim();
+    if (!trimmed) {
+      return { isValid: false, role: "viewer" };
+    }
+
+    const hash = await hashPasscode(trimmed);
+
+    // Look up the document in gatekeeper collection
     const docRef = doc(db, "gatekeeper", hash);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      saveSession(hash);
-      return true;
+      const data = docSnap.data();
+      const role: UserRole = data?.role === "admin" ? "admin" : "viewer";
+      saveSession(hash, role);
+      return { isValid: true, role };
     }
-    return false;
+
+    return { isValid: false, role: "viewer" };
   } catch (err) {
     console.error("Error checking passcode:", err);
     throw new Error("Validation failed. Please try again.");
@@ -42,37 +60,63 @@ export async function checkPasscode(passcode: string): Promise<boolean> {
 }
 
 /**
- * Saves the authenticated session hash and expiry timestamp locally.
+ * Specifically validates if a passcode has Admin permissions.
  */
-export function saveSession(hash: string): void {
+export async function checkAdminPasscode(passcode: string): Promise<boolean> {
+  const result = await checkPasscode(passcode);
+  return result.isValid && result.role === "admin";
+}
+
+/**
+ * Saves the authenticated session hash, role, and expiry timestamp locally.
+ */
+export function saveSession(hash: string, role: UserRole = "viewer"): void {
   if (typeof window === "undefined") return;
   const session: ActiveSession = {
     hash,
+    role,
     expiry: Date.now() + SESSION_TIMEOUT_MS,
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
 /**
- * Validates if there is a currently active, non-expired session.
+ * Validates if there is a currently active, non-expired session and returns session info.
  */
-export function hasActiveSession(): boolean {
-  if (typeof window === "undefined") return false;
+export function getActiveSession(): { isAuthenticated: boolean; isAdmin: boolean } {
+  if (typeof window === "undefined") return { isAuthenticated: false, isAdmin: false };
   const raw = localStorage.getItem(SESSION_KEY);
-  if (!raw) return false;
+  if (!raw) return { isAuthenticated: false, isAdmin: false };
 
   try {
     const session: ActiveSession = JSON.parse(raw);
     if (Date.now() < session.expiry) {
-      return true;
+      return {
+        isAuthenticated: true,
+        isAdmin: session.role === "admin",
+      };
     }
     // Expired
     clearSession();
-    return false;
+    return { isAuthenticated: false, isAdmin: false };
   } catch (e) {
     clearSession();
-    return false;
+    return { isAuthenticated: false, isAdmin: false };
   }
+}
+
+/**
+ * Validates if there is a currently active, non-expired session (boolean).
+ */
+export function hasActiveSession(): boolean {
+  return getActiveSession().isAuthenticated;
+}
+
+/**
+ * Validates if the current active session has Admin rights.
+ */
+export function hasAdminSession(): boolean {
+  return getActiveSession().isAdmin;
 }
 
 /**

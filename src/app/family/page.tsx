@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Typography, Button, Card } from "@material-tailwind/react";
+import { Typography, Button } from "@material-tailwind/react";
 import {
   ArrowRightOnRectangleIcon,
   ArrowLeftIcon,
@@ -9,11 +9,13 @@ import {
   UserPlusIcon,
   HomeIcon,
   ArrowDownTrayIcon,
+  LockClosedIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/solid";
 import {
-  checkPasscode,
-  hasActiveSession,
+  getActiveSession,
   clearSession,
+  checkPasscode,
   fetchFamilyMembers,
   saveFamilyMember,
   deleteFamilyMemberAPI,
@@ -25,6 +27,7 @@ import {
   MemberDetailsModal,
   AddMemberModal,
   FocusedTreeView,
+  AdminUnlockModal,
 } from "../../components/family";
 import FullTreeView from "../../components/family/full-tree-view";
 import { exportTreeToPng } from "../../components/family/export-utils";
@@ -33,6 +36,8 @@ import { FamilyMember, PrefilledRelation } from "@/types";
 export default function FamilyPage() {
   const [passcode, setPasscode] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -56,17 +61,19 @@ export default function FamilyPage() {
   // Navigation Trail Stack
   const [historyStack, setHistoryStack] = useState<string[]>([]);
 
-  // Check for active session on mount & load family data
+  // Check for active session on mount
   useEffect(() => {
-    const authenticated = hasActiveSession();
-    setIsAuthenticated(authenticated);
+    const session = getActiveSession();
+    setIsAuthenticated(session.isAuthenticated);
+    setIsAdmin(session.isAdmin);
+
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("family_tree_start_member_id");
       if (stored) {
         setStartMemberId(stored);
       }
     }
-    if (authenticated) {
+    if (session.isAuthenticated) {
       loadFamilyData();
     }
   }, []);
@@ -132,16 +139,11 @@ export default function FamilyPage() {
     setErrorMsg("");
 
     try {
-      const isValid = await checkPasscode(passcode);
-      if (isValid) {
+      const result = await checkPasscode(passcode);
+      if (result.isValid) {
         setIsAuthenticated(true);
+        setIsAdmin(result.role === "admin");
         setPasscode("");
-        if (typeof window !== "undefined") {
-          const stored = localStorage.getItem("family_tree_start_member_id");
-          if (stored) {
-            setStartMemberId(stored);
-          }
-        }
         loadFamilyData();
       } else {
         setErrorMsg("Incorrect passcode. Access denied.");
@@ -156,96 +158,73 @@ export default function FamilyPage() {
   const handleLogout = () => {
     clearSession();
     setIsAuthenticated(false);
+    setIsAdmin(false);
     setFamilyData([]);
-    setHistoryStack([]);
   };
 
-  // Find related members dynamically
-  const activeMember = familyData.find((m) => m.id === activeMemberId);
-  const father = familyData.find((m) => m.id === activeMember?.fatherId);
-  const mother = familyData.find((m) => m.id === activeMember?.motherId);
-  const spouse = familyData.find((m) => m.id === activeMember?.spouseId);
-
-  const children = familyData.filter(
-    (m) => m.fatherId === activeMemberId || m.motherId === activeMemberId,
-  );
-
-  const siblings = familyData.filter(
-    (m) =>
-      m.id !== activeMemberId &&
-      ((activeMember?.fatherId && m.fatherId === activeMember.fatherId) ||
-        (activeMember?.motherId && m.motherId === activeMember.motherId)),
-  );
-
-  // Navigation handlers
   const handleNavigateToMember = (id: string) => {
-    if (id === activeMemberId) return;
-    setHistoryStack((prev) => [...prev, activeMemberId]);
-    setActiveMemberId(id);
-    setSearchQuery("");
+    if (id !== activeMemberId) {
+      setHistoryStack((prev) => [...prev, activeMemberId]);
+      setActiveMemberId(id);
+    }
   };
 
   const handleGoBack = () => {
-    if (historyStack.length === 0) return;
-    const newStack = [...historyStack];
-    const prevId = newStack.pop();
-    setHistoryStack(newStack);
-    if (prevId) {
+    if (historyStack.length > 0) {
+      const prevId = historyStack[historyStack.length - 1];
+      setHistoryStack((prev) => prev.slice(0, prev.length - 1));
       setActiveMemberId(prevId);
     }
   };
 
-  const handleExportTree = async () => {
-    if (!activeMember) return;
-    try {
-      setIsExporting(true);
-      const filename =
-        viewMode === "hourglass"
-          ? `${activeMember.name.replace(/\s+/g, "_")}_Focused_Family_Photo.png`
-          : `${activeMember.name.replace(/\s+/g, "_")}_Full_Family_Tree.png`;
-      const canvasId =
-        viewMode === "hourglass" ? "focused-tree-canvas" : "full-tree-canvas";
-      await exportTreeToPng(canvasId, filename);
-    } catch (err) {
-      console.error("Export error:", err);
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const openDetails = (member: FamilyMember) => {
+  const handleOpenMemberDetail = (member: FamilyMember) => {
     setSelectedMemberForDetail(member);
     setIsDetailOpen(true);
   };
 
-  // Add relative modal opening pre-fills
   const handleOpenAddRelation = (
-    memberId: string,
-    name: string,
-    relationType: "father" | "mother" | "spouse" | "child" | "sibling",
+    refId: string,
+    refName: string,
+    relType: PrefilledRelation["relationType"],
   ) => {
-    setPrefilledRelation({ memberId, memberName: name, relationType });
+    if (!isAdmin) {
+      setIsUnlockModalOpen(true);
+      return;
+    }
+    setPrefilledRelation({
+      memberId: refId,
+      memberName: refName,
+      relationType: relType,
+    });
     setMemberToEdit(null);
     setIsAddOpen(true);
   };
 
   const handleOpenAddNewMember = () => {
+    if (!isAdmin) {
+      setIsUnlockModalOpen(true);
+      return;
+    }
     setPrefilledRelation(null);
     setMemberToEdit(null);
     setIsAddOpen(true);
   };
 
   const handleOpenEditMember = (member: FamilyMember) => {
-    setPrefilledRelation(null);
+    if (!isAdmin) {
+      setIsUnlockModalOpen(true);
+      return;
+    }
     setMemberToEdit(member);
+    setPrefilledRelation(null);
     setIsDetailOpen(false);
     setIsAddOpen(true);
   };
 
-  const handleAddMemberSubmit = async (
+  const handleSaveMemberAndLink = async (
     slugId: string,
     memberData: Partial<FamilyMember>,
-    relationshipLink?: PrefilledRelation,
+    relationshipLink?: PrefilledRelation | null,
     isEdit?: boolean,
     siblingLinkIds?: string[],
   ) => {
@@ -305,10 +284,8 @@ export default function FamilyPage() {
             const parentGender = focusMember?.gender;
             for (const cId of siblingLinkIds) {
               if (parentGender === "male") {
-                // The new spouse is female, so she is the mother of the children
                 await saveFamilyMember(cId, { motherId: slugId });
               } else if (parentGender === "female") {
-                // The new spouse is male, so he is the father of the children
                 await saveFamilyMember(cId, { fatherId: slugId });
               }
             }
@@ -319,13 +296,11 @@ export default function FamilyPage() {
             const updateObj: Partial<FamilyMember> = {};
             if (parent.gender === "female") {
               updateObj.motherId = refId;
-              // If parent has a spouse and no fatherId is explicitly provided, link spouse as father
               if (parent.spouseId && !memberData.fatherId) {
                 updateObj.fatherId = parent.spouseId;
               }
             } else {
               updateObj.fatherId = refId;
-              // If parent has a spouse and no motherId is explicitly provided, link spouse as mother
               if (parent.spouseId && !memberData.motherId) {
                 updateObj.motherId = parent.spouseId;
               }
@@ -361,11 +336,9 @@ export default function FamilyPage() {
           const newSpouseId = memberData.spouseId;
           if (newSpouseId !== oldSpouseId) {
             if (oldSpouseId) {
-              // Clear old spouse's link
               await saveFamilyMember(oldSpouseId, { spouseId: "" });
             }
             if (newSpouseId) {
-              // Link new spouse reciprocally
               await saveFamilyMember(newSpouseId, { spouseId: slugId });
             }
           }
@@ -392,7 +365,6 @@ export default function FamilyPage() {
       setIsAddOpen(false);
       await loadFamilyData();
 
-      // If active member was deleted, navigate to start member or first remaining
       if (memberId === activeMemberId) {
         const remaining = familyData.filter((m) => m.id !== memberId);
         if (remaining.length > 0) {
@@ -410,16 +382,64 @@ export default function FamilyPage() {
     }
   };
 
-  // Prevent flicker during initial session checks
+  // Build active member's immediate family nodes
+  const activeMember = familyData.find((m) => m.id === activeMemberId);
+  const father = activeMember?.fatherId
+    ? familyData.find((m) => m.id === activeMember.fatherId)
+    : undefined;
+  const mother = activeMember?.motherId
+    ? familyData.find((m) => m.id === activeMember.motherId)
+    : undefined;
+  const spouse = activeMember?.spouseId
+    ? familyData.find((m) => m.id === activeMember.spouseId)
+    : undefined;
+
+  const siblings = familyData.filter((m) => {
+    if (!activeMember || m.id === activeMember.id) return false;
+    const hasSameFather =
+      activeMember.fatherId && m.fatherId === activeMember.fatherId;
+    const hasSameMother =
+      activeMember.motherId && m.motherId === activeMember.motherId;
+    return hasSameFather || hasSameMother;
+  });
+
+  const childrenList = familyData.filter((m) => {
+    if (!activeMember) return false;
+    return m.fatherId === activeMember.id || m.motherId === activeMember.id;
+  });
+
+  const handleExportTree = async () => {
+    if (!activeMember) return;
+    try {
+      setIsExporting(true);
+      const canvasId = viewMode === "full" ? "full-tree-canvas" : "focused-tree-canvas";
+      const fileName =
+        viewMode === "full"
+          ? "family-tree-full.png"
+          : `${activeMember.name.toLowerCase().replace(/\s+/g, "-")}-family-tree.png`;
+      await exportTreeToPng(canvasId, fileName);
+    } catch (err) {
+      console.error("Export failed:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // 1. Initial Session Check Screen
   if (isAuthenticated === null) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+          <Typography className="text-sm font-bold text-slate-400 font-sans tracking-wide" placeholder={undefined}>
+            Checking Access...
+          </Typography>
+        </div>
       </div>
     );
   }
 
-  // Security Gate Full-Screen View
+  // 2. Unauthenticated Security Gate Screen
   if (!isAuthenticated) {
     return (
       <SecurityGate
@@ -432,29 +452,28 @@ export default function FamilyPage() {
     );
   }
 
-  // Genealogy Explorer Dashboard
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-12 relative bg-slate-50 text-slate-800">
-      {/* Background radial glows and dotted mesh */}
-      <div className="absolute inset-0 bg-image bg-size pointer-events-none opacity-40" />
-
-      <div className="container mx-auto max-w-5xl relative z-10">
-        {/* Modern Responsive Header */}
-        <header className="mb-8 border-b border-slate-200/80 pb-6">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-indigo-50/20 to-white text-slate-900 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        {/* Header Bar */}
+        <header className="mb-6 border-b border-slate-200/80 pb-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            {/* Title & Badge */}
             <div>
               <div className="flex items-center gap-2.5">
                 <Typography
                   variant="h2"
-                  className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading tracking-tight"
+                  className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 font-heading"
                   placeholder={undefined}
                 >
-                  Family Heritage
+                  Jagwan Family Tree
                 </Typography>
-                {familyData.length > 0 && (
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-                    {familyData.length} {familyData.length === 1 ? "Member" : "Members"}
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                  {familyData.length} Members
+                </span>
+                {isAdmin && (
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
+                    <SparklesIcon className="h-3 w-3 text-emerald-500" />
+                    Admin Mode
                   </span>
                 )}
               </div>
@@ -465,27 +484,42 @@ export default function FamilyPage() {
 
             {/* Top Primary Actions */}
             <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-              <Button
-                size="sm"
-                onClick={handleOpenAddNewMember}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl capitalize font-bold text-xs sm:text-sm tracking-wide shadow-sm hover:shadow-md px-3.5 sm:px-4 py-2 transition-all"
-                placeholder={undefined}
-              >
-                <UserPlusIcon className="h-4 w-4" />
-                <span>Add Member</span>
-              </Button>
+              {isAdmin ? (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={handleOpenAddNewMember}
+                    className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl capitalize font-bold text-xs sm:text-sm tracking-wide shadow-sm hover:shadow-md px-3.5 sm:px-4 py-2 transition-all"
+                    placeholder={undefined}
+                  >
+                    <UserPlusIcon className="h-4 w-4" />
+                    <span>Add Member</span>
+                  </Button>
 
-              <Button
-                size="sm"
-                variant="outlined"
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 border-slate-200 hover:border-slate-400 text-slate-600 hover:text-slate-900 rounded-xl capitalize font-bold text-xs sm:text-sm tracking-wide bg-white hover:bg-slate-50 transition-all px-3 py-2"
-                placeholder={undefined}
-                title="Lock / Sign out"
-              >
-                <ArrowRightOnRectangleIcon className="h-4 w-4 text-slate-500" />
-                <span className="hidden sm:inline">Lock</span>
-              </Button>
+                  <Button
+                    size="sm"
+                    variant="outlined"
+                    onClick={handleLogout}
+                    className="flex items-center gap-1.5 border-slate-200 hover:border-slate-400 text-slate-600 hover:text-slate-900 rounded-xl capitalize font-bold text-xs sm:text-sm tracking-wide bg-white hover:bg-slate-50 transition-all px-3 py-2"
+                    placeholder={undefined}
+                    title="Lock Admin Edit Mode"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-4 w-4 text-slate-500" />
+                    <span>Lock</span>
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => setIsUnlockModalOpen(true)}
+                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl capitalize font-bold text-xs sm:text-sm tracking-wide shadow-sm px-3.5 py-2 transition-all"
+                  placeholder={undefined}
+                  title="Unlock Admin Edit Mode"
+                >
+                  <LockClosedIcon className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Admin Edit</span>
+                </Button>
+              )}
             </div>
           </div>
 
@@ -520,7 +554,7 @@ export default function FamilyPage() {
         {/* View Mode Toggle & Export Controls */}
         {familyData.length > 0 && (
           <div className="flex items-center justify-center gap-3 mb-8 flex-wrap">
-            {/* Quick Back Button (Only visible when user navigated deeper) */}
+            {/* Quick Back Button */}
             {historyStack.length > 0 && (
               <button
                 type="button"
@@ -568,100 +602,93 @@ export default function FamilyPage() {
                 title="Download a picture of this family tree to save or share on WhatsApp"
               >
                 <ArrowDownTrayIcon
-                  className={`h-4 w-4 text-indigo-600 ${isExporting ? "animate-bounce" : ""}`}
+                  className={`h-4 w-4 text-indigo-500 ${
+                    isExporting ? "animate-bounce" : ""
+                  }`}
                 />
-                <span>{isExporting ? "Saving Picture..." : "Download Family Photo"}</span>
+                <span className="font-semibold">
+                  {isExporting ? "Generating Photo..." : "Save Tree Photo"}
+                </span>
               </button>
             )}
           </div>
         )}
 
-        {/* Empty State Banner when Firestore collection is empty */}
-        {familyData.length === 0 && (
-          <Card
-            className="p-8 border border-slate-200/60 bg-white shadow-sm flex flex-col items-center justify-center text-center py-20 rounded-3xl"
-            placeholder={undefined}
-          >
-            <div className="h-16 w-16 mb-6 flex items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100/30 text-indigo-600">
-              <CheckCircleIcon className="h-8 w-8" />
-            </div>
+        {/* ========================================================================= */}
+        {/* VIEW RENDERING */}
+        {/* ========================================================================= */}
+        {familyData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border border-slate-100 shadow-xl max-w-lg mx-auto mt-10">
             <Typography
               variant="h4"
-              className="text-2xl font-bold text-slate-900 font-heading mb-3"
+              className="text-slate-800 font-extrabold font-heading mb-2"
               placeholder={undefined}
             >
-              Heritage Archive is Empty
+              Family Records Empty
             </Typography>
             <Typography
-              className="text-slate-500 font-normal leading-relaxed text-base font-sans max-w-md mb-8"
+              className="text-slate-500 text-sm font-normal mb-6"
               placeholder={undefined}
             >
-              Please add your first family member to begin building your
-              interactive lineage tree explorer.
+              No family records found. Unlock Admin mode to record the root patriarch/matriarch.
             </Typography>
             <Button
-              size="md"
-              onClick={handleOpenAddNewMember}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl capitalize font-bold text-sm tracking-wide shadow-md px-6 py-3 transition-all"
+              onClick={() => (isAdmin ? handleOpenAddNewMember() : setIsUnlockModalOpen(true))}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl capitalize font-bold text-sm tracking-wide px-6 py-3 shadow-md"
               placeholder={undefined}
             >
-              <UserPlusIcon className="h-4 w-4" />
-              Add First Member
+              {isAdmin ? "Add Root Member" : "Unlock Admin Edit"}
             </Button>
-          </Card>
-        )}
-
-        {/* Dynamic Pedigree Explorer Layout Canvas */}
-        {familyData.length > 0 &&
-          activeMember &&
-          viewMode === "hourglass" && (
-            <FocusedTreeView
-              activeMember={activeMember}
-              father={father}
-              mother={mother}
-              spouse={spouse}
-              siblings={siblings}
-              childrenList={children}
-              onNavigateToMember={handleNavigateToMember}
-              onAddRelation={handleOpenAddRelation}
-              onViewDetails={openDetails}
-            />
-          )}
-
-        {/* Full Family Tree View (View-Only) */}
-        {familyData.length > 0 && viewMode === "full" && (
+          </div>
+        ) : viewMode === "full" ? (
           <FullTreeView
             familyData={familyData}
             activeMemberId={activeMemberId}
-            onSelectMember={(memberId) => {
-              handleNavigateToMember(memberId);
-            }}
-            onViewDetails={openDetails}
+            onSelectMember={handleNavigateToMember}
+            onViewDetails={handleOpenMemberDetail}
           />
-        )}
-
-        {/* Member Details Popup Modal Dialog */}
-        <MemberDetailsModal
-          isOpen={isDetailOpen}
-          onClose={() => setIsDetailOpen(false)}
-          member={selectedMemberForDetail}
-          onEdit={handleOpenEditMember}
-          onDelete={handleDeleteMember}
-        />
-
-        {/* Add Family Member Modal */}
-        <AddMemberModal
-          isOpen={isAddOpen}
-          onClose={() => {
-            setIsAddOpen(false);
-            setMemberToEdit(null);
-          }}
-          onSubmit={handleAddMemberSubmit}
-          existingMembers={familyData}
-          prefilledRelation={prefilledRelation}
-          memberToEdit={memberToEdit}
-        />
+        ) : activeMember ? (
+          <FocusedTreeView
+            activeMember={activeMember}
+            father={father}
+            mother={mother}
+            spouse={spouse}
+            siblings={siblings}
+            childrenList={childrenList}
+            onNavigateToMember={handleNavigateToMember}
+            onAddRelation={handleOpenAddRelation}
+            onViewDetails={handleOpenMemberDetail}
+            canEdit={isAdmin}
+          />
+        ) : null}
       </div>
+
+      {/* Member Details Modal */}
+      <MemberDetailsModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        member={selectedMemberForDetail}
+        onEdit={handleOpenEditMember}
+        onDelete={handleDeleteMember}
+        canEdit={isAdmin}
+      />
+
+      {/* Add / Edit Member Modal */}
+      <AddMemberModal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        prefilledRelation={prefilledRelation}
+        memberToEdit={memberToEdit}
+        existingMembers={familyData}
+        onSubmit={handleSaveMemberAndLink}
+      />
+
+      {/* Admin Unlock Modal */}
+      <AdminUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+        onSuccess={() => setIsAdmin(true)}
+      />
     </div>
   );
 }
