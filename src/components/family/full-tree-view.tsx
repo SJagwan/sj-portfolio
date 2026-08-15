@@ -304,11 +304,24 @@ export function FullTreeView({
 
   /**
    * Helper: renderDescendantsTier
-   * Renders the descendants (children and optionally grandchildren) of a given family member.
+   * Recursively renders the descendants of a given family member down to maxDepthRemaining.
    */
-  const renderDescendantsTier = (parentMember: FamilyMember, isCollateral: boolean) => {
+  const renderDescendantsTier = (
+    parentMember: FamilyMember,
+    isCollateral: boolean,
+    maxDepthRemaining: number = 2
+  ): React.ReactNode => {
+    if (maxDepthRemaining <= 0) return null;
+
+    const parentSpouseId = parentMember.spouseId;
     const children = familyData
-      .filter((child) => child.fatherId === parentMember.id || child.motherId === parentMember.id)
+      .filter(
+        (child) =>
+          child.fatherId === parentMember.id ||
+          child.motherId === parentMember.id ||
+          (parentSpouseId &&
+            (child.fatherId === parentSpouseId || child.motherId === parentSpouseId))
+      )
       .sort((a, b) => {
         const yearA = getBirthYear(a);
         const yearB = getBirthYear(b);
@@ -336,21 +349,6 @@ export function FullTreeView({
             const isFirst = index === 0;
             const isLast = index === children.length - 1;
 
-            // Only retrieve grandchildren for the focus member's direct lineage
-            const grandchildren = !isCollateral
-              ? familyData
-                  .filter(
-                    (grandchild) =>
-                      grandchild.fatherId === child.id || grandchild.motherId === child.id
-                  )
-                  .sort((a, b) => {
-                    const yearA = getBirthYear(a);
-                    const yearB = getBirthYear(b);
-                    if (yearA !== yearB) return yearA - yearB;
-                    return a.name.localeCompare(b.name);
-                  })
-              : [];
-
             return (
               <div key={child.id} className="relative flex flex-col items-center px-3 sm:px-5">
                 {/* Seamless Edge-to-Edge Crossbar */}
@@ -375,7 +373,7 @@ export function FullTreeView({
                   <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 -mt-0.5 ring-2 ring-white shadow-xs" />
                 </div>
 
-                {/* Sibling Couple / Single Card */}
+                {/* Node Card */}
                 <div
                   className={`flex items-center gap-2 p-2 rounded-2xl border shadow-xs z-10 shrink-0 ${
                     isCollateral
@@ -400,53 +398,8 @@ export function FullTreeView({
                   )}
                 </div>
 
-                {/* Grandchildren Tier (Direct active branch only) */}
-                {!isCollateral && grandchildren.length > 0 && (
-                  <div className="flex flex-col items-center w-full mt-1 z-0">
-                    <div className="flex flex-col items-center">
-                      <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white shadow-xs" />
-                      <div className="w-0.5 h-6 bg-gradient-to-b from-indigo-300 to-indigo-200" />
-                    </div>
-
-                    <div className="flex flex-row justify-center items-start">
-                      {grandchildren.map((grandchild, grandchildIndex) => {
-                        const isGFirst = grandchildIndex === 0;
-                        const isGLast = grandchildIndex === grandchildren.length - 1;
-                        const isGSingle = grandchildren.length === 1;
-
-                        return (
-                          <div
-                            key={grandchild.id}
-                            className="relative flex flex-col items-center px-3 sm:px-5"
-                          >
-                            {!isGSingle && (
-                              <div className="absolute top-0 left-0 right-0 h-0.5 flex z-0">
-                                <div
-                                  className={`flex-1 border-t-2 border-indigo-200 ${
-                                    isGFirst ? "invisible" : ""
-                                  }`}
-                                />
-                                <div
-                                  className={`flex-1 border-t-2 border-indigo-200 ${
-                                    isGLast ? "invisible" : ""
-                                  }`}
-                                />
-                              </div>
-                            )}
-                            <div className="flex flex-col items-center pointer-events-none mb-1 z-0">
-                              <div className="w-0.5 h-4 bg-indigo-200" />
-                              <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 -mt-0.5 ring-2 ring-white shadow-xs" />
-                            </div>
-                            <MemberNodeCard
-                              member={grandchild}
-                              isCurrentFocus={grandchild.id === activeMemberId}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                {/* Recurse to render the next generation! */}
+                {maxDepthRemaining > 1 && renderDescendantsTier(child, isCollateral, maxDepthRemaining - 1)}
               </div>
             );
           })}
@@ -691,14 +644,14 @@ export function FullTreeView({
                                       )}
                                     </div>
 
-                                    {renderDescendantsTier(sibling, !isFocus)}
+                                    {renderDescendantsTier(sibling, !isFocus, 2)}
                                   </div>
                                 );
                               })}
                             </div>
                           </div>
                         ) : (
-                          renderDescendantsTier(sib, true)
+                          renderDescendantsTier(sib, true, 3)
                         )}
                       </div>
                     );
@@ -765,7 +718,7 @@ export function FullTreeView({
                           )}
                         </div>
 
-                        {renderDescendantsTier(sibling, !isFocus)}
+                        {renderDescendantsTier(sibling, !isFocus, 2)}
                       </div>
                     );
                   })}
