@@ -41,6 +41,7 @@ export function AddMemberModal({
   const [deathDate, setDeathDate] = useState("");
   const [birthPlace, setBirthPlace] = useState("");
   const [bio, setBio] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
 
   // Relational IDs
   const [fatherId, setFatherId] = useState("");
@@ -64,6 +65,7 @@ export function AddMemberModal({
         setDeathDate(memberToEdit.deathDate || "");
         setBirthPlace(memberToEdit.birthPlace || "");
         setBio(memberToEdit.bio || "");
+        setPhotoUrl(memberToEdit.photoUrl || "");
         setErrorMsg("");
         setFatherId(memberToEdit.fatherId || "");
         setMotherId(memberToEdit.motherId || "");
@@ -75,6 +77,7 @@ export function AddMemberModal({
         setDeathDate("");
         setBirthPlace("");
         setBio("");
+        setPhotoUrl("");
         setErrorMsg("");
 
         // Default selects
@@ -118,8 +121,16 @@ export function AddMemberModal({
             if (parent) {
               if (parent.gender === "male") {
                 setFatherId(parent.id);
+                // Pre-fill mother if the father has a registered spouse
+                if (parent.spouseId) {
+                  setMotherId(parent.spouseId);
+                }
               } else {
                 setMotherId(parent.id);
+                // Pre-fill father if the mother has a registered spouse
+                if (parent.spouseId) {
+                  setFatherId(parent.spouseId);
+                }
               }
             }
           } else if (prefilledRelation.relationType === "sibling") {
@@ -146,10 +157,16 @@ export function AddMemberModal({
     const ancestors = getAncestors(memberId, existingMembers);
     const current = existingMembers.find((m) => m.id === memberId);
 
+    const isSibling = (m: FamilyMember) => {
+      if (!current) return false;
+      return (
+        Boolean(current.fatherId && m.fatherId && m.fatherId === current.fatherId) ||
+        Boolean(current.motherId && m.motherId && m.motherId === current.motherId)
+      );
+    };
+
     // Filter out:
     // 1. The member themselves
-    // 2. Any descendants (cannot be parents, spouses, or siblings)
-    // 3. Any ancestors (cannot be children or spouses)
     let list = existingMembers.filter((m) => m.id !== memberId);
 
     if (relationType === "father") {
@@ -157,6 +174,8 @@ export function AddMemberModal({
         (m) =>
           m.gender === "male" &&
           !descendants.has(m.id) &&
+          !ancestors.has(m.id) &&
+          !isSibling(m) &&
           (!current || m.id !== current.motherId) &&
           (!current || m.id !== current.spouseId)
       );
@@ -165,33 +184,35 @@ export function AddMemberModal({
         (m) =>
           m.gender === "female" &&
           !descendants.has(m.id) &&
+          !ancestors.has(m.id) &&
+          !isSibling(m) &&
           (!current || m.id !== current.fatherId) &&
           (!current || m.id !== current.spouseId)
       );
     } else if (relationType === "spouse") {
-      const isSibling = (m: FamilyMember) => {
-        if (!current) return false;
-        return (
-          Boolean(current.fatherId && m.fatherId && m.fatherId === current.fatherId) ||
-          Boolean(current.motherId && m.motherId && m.motherId === current.motherId)
-        );
-      };
       list = list.filter(
         (m) =>
           !descendants.has(m.id) &&
           !ancestors.has(m.id) &&
-          !isSibling(m)
+          !isSibling(m) &&
+          (!m.spouseId || m.spouseId === memberId) &&
+          (current ? (current.gender === "male" ? m.gender === "female" : m.gender === "male") : true)
       );
     } else if (relationType === "child") {
       list = list.filter(
         (m) =>
           !ancestors.has(m.id) &&
+          !descendants.has(m.id) &&
+          !isSibling(m) &&
           (!current || (m.id !== current.spouseId && m.id !== current.fatherId && m.id !== current.motherId))
       );
     } else if (relationType === "sibling") {
+      // Direct siblings cannot be descendants (son/daughter/grandson), ancestors (parents), or current spouse
       list = list.filter(
         (m) =>
           !descendants.has(m.id) &&
+          !ancestors.has(m.id) &&
+          !isSibling(m) &&
           (!current || (m.id !== current.fatherId && m.id !== current.motherId && m.id !== current.spouseId))
       );
     }
@@ -239,6 +260,7 @@ export function AddMemberModal({
         deathDate: deathDate.trim() || "",
         birthPlace: birthPlace.trim() || "",
         bio: bio.trim() || "",
+        photoUrl: photoUrl.trim() || "",
         fatherId: fatherId || "",
         motherId: motherId || "",
         spouseId: spouseId || "",
@@ -275,6 +297,7 @@ export function AddMemberModal({
     if (deathDate.trim()) memberData.deathDate = deathDate.trim();
     if (birthPlace.trim()) memberData.birthPlace = birthPlace.trim();
     if (bio.trim()) memberData.bio = bio.trim();
+    if (photoUrl.trim()) memberData.photoUrl = photoUrl.trim();
     if (fatherId) memberData.fatherId = fatherId;
     if (motherId) memberData.motherId = motherId;
     if (spouseId) memberData.spouseId = spouseId;
@@ -333,11 +356,19 @@ export function AddMemberModal({
           m.id !== currentMemberId &&
           !editDescendants.has(m.id) &&
           !editAncestors.has(m.id) &&
-          !isSibling(m)
+          !isSibling(m) &&
+          (!m.spouseId || m.spouseId === currentMemberId) &&
+          (current ? (current.gender === "male" ? m.gender === "female" : m.gender === "male") : true)
+      );
+    } else {
+      list = list.filter(
+        (m) =>
+          !m.spouseId &&
+          (gender === "male" ? m.gender === "female" : m.gender === "male")
       );
     }
     return list;
-  }, [existingMembers, currentMemberId, editDescendants, editAncestors]);
+  }, [existingMembers, currentMemberId, editDescendants, editAncestors, gender]);
 
   const siblingOptions = useMemo(() => {
     if (!prefilledRelation || (prefilledRelation.relationType !== "father" && prefilledRelation.relationType !== "mother")) {
@@ -436,6 +467,8 @@ export function AddMemberModal({
               setDeathDate={setDeathDate}
               bio={bio}
               setBio={setBio}
+              photoUrl={photoUrl}
+              setPhotoUrl={setPhotoUrl}
               fatherId={fatherId}
               setFatherId={setFatherId}
               motherId={motherId}

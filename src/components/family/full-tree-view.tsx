@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useMemo } from "react";
@@ -58,15 +59,23 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
         title={isCurrentFocus ? "Currently Focused Member" : "Click to view family tree centered on this member"}
       >
         <div
-          className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+          className={`h-6 w-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold shrink-0 ${
             isCurrentFocus
               ? "bg-indigo-600 text-white"
               : isFemale
-              ? "bg-pink-50 text-pink-600"
+              ? "bg-rose-50 text-rose-600"
               : "bg-indigo-50 text-indigo-600"
           }`}
         >
-          {member.name.charAt(0)}
+          {member.photoUrl ? (
+            <img
+              src={member.photoUrl}
+              alt={member.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            member.name.charAt(0)
+          )}
         </div>
         <div className="min-w-0">
           <p className={`text-[11px] font-bold leading-tight truncate ${isCurrentFocus ? "text-indigo-900" : "text-slate-900"}`}>
@@ -350,8 +359,8 @@ export function FullTreeView({ familyData, activeMemberId, onSelectMember }: Ful
         </div>
 
         {activeMember ? (
-          <div className="py-8 w-full">
-            <div className="inline-flex flex-col items-center min-w-full px-4">
+          <div className="py-8 w-full overflow-x-auto">
+            <div id="full-tree-canvas" className="inline-flex flex-col items-center min-w-full px-8 py-6 bg-slate-50/40 rounded-3xl">
               
               {/* Generation -2: Grandparents */}
               {hasGrandparents && (

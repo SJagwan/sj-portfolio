@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
@@ -55,13 +56,21 @@ export function MemberDetailsModal({
           {/* Header Identity */}
           <div className="flex flex-col items-center border-b border-slate-100 pb-4 text-center">
             <div
-              className={`h-16 w-16 mb-4 rounded-full flex items-center justify-center text-xl font-bold shadow-inner ${
+              className={`h-20 w-20 mb-4 rounded-3xl overflow-hidden flex items-center justify-center text-2xl font-black shadow-inner border-2 ${
                 isFemale
-                  ? "bg-pink-50 text-pink-600"
-                  : "bg-indigo-50 text-indigo-600"
+                  ? "bg-rose-50 text-rose-600 border-rose-100"
+                  : "bg-indigo-50 text-indigo-600 border-indigo-100"
               }`}
             >
-              {member.name.charAt(0)}
+              {member.photoUrl ? (
+                <img
+                  src={member.photoUrl}
+                  alt={member.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                member.name.charAt(0)
+              )}
             </div>
             <Typography
               variant="h4"

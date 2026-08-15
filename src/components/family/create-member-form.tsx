@@ -1,8 +1,7 @@
-"use client";
-
 import React from "react";
 import { Typography } from "@material-tailwind/react";
 import { FamilyMember, PrefilledRelation, Gender } from "@/types";
+import AvatarPicker from "./avatar-picker";
 
 interface CreateMemberFormProps {
   name: string;
@@ -17,6 +16,8 @@ interface CreateMemberFormProps {
   setDeathDate: (v: string) => void;
   bio: string;
   setBio: (v: string) => void;
+  photoUrl: string;
+  setPhotoUrl: (url: string) => void;
   fatherId: string;
   setFatherId: (v: string) => void;
   motherId: string;
@@ -43,6 +44,8 @@ export function CreateMemberForm({
   setDeathDate,
   bio,
   setBio,
+  photoUrl,
+  setPhotoUrl,
   fatherId,
   setFatherId,
   motherId,
@@ -57,6 +60,9 @@ export function CreateMemberForm({
 }: CreateMemberFormProps) {
   return (
     <>
+      {/* Profile Photo / Avatar Picker */}
+      <AvatarPicker photoUrl={photoUrl} setPhotoUrl={setPhotoUrl} />
+
       {/* Name Field */}
       <div>
         <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">
