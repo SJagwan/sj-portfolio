@@ -66,7 +66,11 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
                       <PhoneIcon className="h-5 w-5 text-indigo-400" />
                     </div>
                     <Typography className="font-semibold font-sans text-base" placeholder={undefined}>
-                      +91 {userInfo.phoneNumber}
+                      {(() => {
+                        const raw = String(userInfo.phoneNumber).trim();
+                        const cleaned = raw.replace(/^(\+91[\s-]?|91[\s-]?|0)/, "").trim();
+                        return `+91 ${cleaned}`;
+                      })()}
                     </Typography>
                   </div>
                 )}
@@ -87,6 +91,7 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
                   <a
                     href={userInfo.githubUrl}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700/40 hover:border-slate-600 transition-all duration-200"
                   >
                     GitHub
@@ -96,6 +101,7 @@ export function ContactForm({ userInfo }: { userInfo: any }) {
                   <a
                     href={userInfo.linkedInUrl}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-900/30 hover:bg-indigo-900/50 text-indigo-200 border border-indigo-500/20 hover:border-indigo-500/30 transition-all duration-200"
                   >
                     LinkedIn

@@ -48,22 +48,39 @@ export const getProjectDetailsAPI = async () => {
 export const storage = getStorage();
 
 export const getImage = async (url) => {
-  const storageRef = ref(storage, url);
-  const urlValue = await getDownloadURL(storageRef);
-  return urlValue;
+  if (!url) return "";
+  // If it's already an absolute web URL or data URI, return as-is
+  if (typeof url === "string" && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:"))) {
+    return url;
+  }
+  try {
+    const storageRef = ref(storage, url);
+    const urlValue = await getDownloadURL(storageRef);
+    return urlValue;
+  } catch (error) {
+    console.warn(`Failed to resolve image URL for "${url}":`, error);
+    return typeof url === "string" ? url : "";
+  }
 };
 
 export const downloadResume = async () => {
-  const storageRef = ref(storage, "documents/Shubhanshu Jagwan Resume.pdf");
-  const url = await getDownloadURL(storageRef);
+  try {
+    const storageRef = ref(storage, "documents/Shubhanshu Jagwan Resume.pdf");
+    const url = await getDownloadURL(storageRef);
 
-  const link = document.createElement("a");
-  link.href = url;
-  link.target = "_blank";
-  link.download = "Shubhanshu_Jagwan_Resume.pdf";
-  document.body.appendChild(link);
-  link.click();
-  setTimeout(() => {
-    link.remove();
-  }, 100);
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.download = "Shubhanshu_Jagwan_Resume.pdf";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      link.remove();
+    }, 100);
+    return true;
+  } catch (error) {
+    console.error("Failed to download resume:", error);
+    throw error;
+  }
 };

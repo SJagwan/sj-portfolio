@@ -66,14 +66,20 @@ export default function Portfolio() {
         // Process project data
         if (projectData.status === "fulfilled" && projectData.value) {
           const data = projectData.value;
+          const rawProjects = Array.isArray(data.projects) ? data.projects : [];
           const updatedProjectInfo = await Promise.all(
-            data.projects.map(async (project: any) => {
+            rawProjects.map(async (project: any) => {
+              const rawImages = Array.isArray(project.images) ? project.images : [];
               const images = await Promise.all(
-                project.images.map(async (image: string) => {
-                  return await getImage(image);
+                rawImages.map(async (image: string) => {
+                  try {
+                    return await getImage(image);
+                  } catch {
+                    return typeof image === "string" ? image : "";
+                  }
                 })
               );
-              return { ...project, images };
+              return { ...project, images: images.filter(Boolean) };
             })
           );
           setProjectInfo(updatedProjectInfo);

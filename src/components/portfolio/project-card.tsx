@@ -70,16 +70,24 @@ export function ProjectCard({
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-4 border-t border-slate-100/80">
-            <a
-              href={prodLink}
-              target="_blank"
-              className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-bold text-sm transition-all duration-200 group"
-            >
-              See Project Details
-              <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform">
-                &rarr;
+            {prodLink && prodLink.trim() && prodLink !== "#" ? (
+              <a
+                href={prodLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`See project details for ${title}`}
+                className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-bold text-sm transition-all duration-200 group"
+              >
+                See Project Details
+                <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform">
+                  &rarr;
+                </span>
+              </a>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-slate-400 font-medium text-sm">
+                Internal / Private Project
               </span>
-            </a>
+            )}
 
             {/* Custom Dot Indicators */}
             {images?.length > 1 && (
